@@ -1,0 +1,14 @@
+# Pygame Constants
+WIDTH, HEIGHT = 600, 600
+ROWS, COLS = 3, 3
+CELL_SIZE = WIDTH // COLS
+FPS = 30
+
+
+# Colors
+WHITE = (255, 255, 255)
+GREY = (100, 100, 100)
+GREEN = (0, 255, 0)
+RED = (255, 0, 0)
+CAR_COLOR = (0, 0, 255)
+BLACK = (0, 0, 0)
