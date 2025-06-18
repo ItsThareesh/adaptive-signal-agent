@@ -38,6 +38,26 @@ def draw_edge_green_boxes():
     pygame.draw.rect(screen, GREEN, bottom_right_rect)
 
 
+def draw_lanes():
+    LANE_WIDTH = 15
+    LANE_LENGTH = 200
+    CENTER = WIDTH // 2
+
+    # Vertical lanes (North & South)
+    north_lane = pygame.Rect(CENTER - LANE_WIDTH, 0, LANE_WIDTH, LANE_LENGTH)
+    pygame.draw.rect(screen, GREY, north_lane)
+
+    south_lane = pygame.Rect(CENTER - LANE_WIDTH, HEIGHT - LANE_LENGTH, LANE_WIDTH, LANE_LENGTH)
+    pygame.draw.rect(screen, GREY, south_lane)
+
+    # Horizontal lanes (West & East)
+    west_lane = pygame.Rect(0, CENTER - LANE_WIDTH, LANE_LENGTH, LANE_WIDTH)
+    pygame.draw.rect(screen, GREY, west_lane)
+
+    east_lane = pygame.Rect(WIDTH - LANE_LENGTH, CENTER - LANE_WIDTH, LANE_LENGTH, LANE_WIDTH)
+    pygame.draw.rect(screen, GREY, east_lane)
+
+
 def show_fps():
     font = pygame.font.SysFont(None, 24)
 
@@ -58,6 +78,7 @@ def main():
                 running = False
 
         draw_edge_green_boxes()
+        draw_lanes()
         show_fps()
 
         pygame.display.flip()
