@@ -1,0 +1,4 @@
+# CAR Properties
+CAR_SIZE = 20
+CAR_SPEED = 2
+SPAWN_PROBABILITY = 0.2
