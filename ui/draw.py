@@ -1,13 +1,6 @@
 import pygame
 from . import ui_constants
 
-# Colours
-BLACK = (0, 0, 0)
-GREY = (180, 180, 180)
-WHITE = (255, 255, 255)
-GREEN = (0, 255, 0)
-RED = (255, 0, 0)
-
 
 def draw_edge_green_boxes(screen):
     width, ui_constants.HEIGHT = ui_constants.WIDTH, ui_constants.HEIGHT
@@ -28,7 +21,7 @@ def draw_edge_green_boxes(screen):
                                     ui_constants.GRASS_BOX_SIZE, ui_constants.GRASS_BOX_SIZE, ui_constants.GRASS_BOX_SIZE)
 
     for box in [top_left_rect, bottom_left_rect, top_right_rect, bottom_right_rect]:
-        pygame.draw.rect(screen, GREY, box)
+        pygame.draw.rect(screen, ui_constants.UI_COLORS['GREEN'], box)
 
 
 def draw_lanes(screen):
@@ -43,7 +36,7 @@ def draw_lanes(screen):
                             ui_constants.LANE_LENGTH, ui_constants.LANE_WIDTH)
 
     for lane in [north_lane, south_lane, west_lane, east_lane]:
-        pygame.draw.rect(screen, GREY, lane)
+        pygame.draw.rect(screen, ui_constants.UI_COLORS['GREY'], lane)
 
 
 def show_fps(screen, clock):

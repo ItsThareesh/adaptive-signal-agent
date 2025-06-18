@@ -1,13 +1,16 @@
 import pygame
+import logging
+import random
 from ui import ui_constants
 from game import game_constants
-import random
 
 
 class Car:
     def __init__(self, direction):
         self.direction = direction
-        self.color = ui_constants.CAR_COLOR
+        self.color = random.choice(list(ui_constants.CAR_COLORS.values()))
+
+        self.logger = logging.getLogger(__name__)
 
         self._decide_direction()
 
@@ -41,7 +44,8 @@ class Car:
             self.vy = 0
 
         else:
-            raise ValueError(f"Invalid direction: {self.direction}")
+            self.logger.fatal(f"Invalid direction: {self.direction}")
+            raise
 
     def is_out_of_bounds(self):
         left_bound = 0 - game_constants.CAR_SIZE
@@ -61,4 +65,5 @@ class Car:
     def draw(self, screen):
         rect = pygame.Rect(self.x - game_constants.CAR_SIZE//2, self.y - game_constants.CAR_SIZE//2,
                            game_constants.CAR_SIZE, game_constants.CAR_SIZE)
+
         pygame.draw.rect(screen, self.color, rect)
