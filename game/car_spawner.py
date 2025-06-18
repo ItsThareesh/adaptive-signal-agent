@@ -1,6 +1,7 @@
 import random
 from game.car import Car
 from . import game_constants as game_constants
+from utils.logger import logger
 
 
 class CarSpawner:
@@ -24,6 +25,9 @@ class CarSpawner:
         car = Car(direction)
         self.cars.append(car)
 
+        # Log the information
+        logger.info(f"Spawning car heading {direction}")
+
     def update_cars(self, screen):
         for car in self.cars:
             car.move()
@@ -32,4 +36,6 @@ class CarSpawner:
             if car.is_out_of_bounds():
                 self.cars.remove(car)
                 self.total_spawned_cars += 1
-                print(f"Removed Car {self.total_spawned_cars}")
+
+                # Log the information
+                logger.info(f"Removed Car {self.total_spawned_cars}")

@@ -4,4 +4,3 @@ __pycache__
 q-learning.py
 ui/intersection.py
 ui/traffic_light.py
-utils/

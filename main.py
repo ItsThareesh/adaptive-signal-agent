@@ -3,6 +3,7 @@ import sys
 from ui.draw import draw_edge_green_boxes, draw_lanes, show_fps
 from ui import ui_constants
 from game.car_spawner import CarSpawner
+from utils.logger import logger
 
 # Pygame setup
 pygame.init()
@@ -10,13 +11,13 @@ screen = pygame.display.set_mode((ui_constants.WIDTH, ui_constants.HEIGHT))
 pygame.display.set_caption("Traffic Intersection Simulation")
 clock = pygame.time.Clock()
 
-
-# Create Spawner Instance
+# Create Instances
 spawner = CarSpawner()
 
 
 def main():
     running = True
+    logger.info("Started App!")
 
     while running:
         screen.fill(ui_constants.UI_COLORS['BLACK'])
