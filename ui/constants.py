@@ -1,14 +1,26 @@
-# Pygame Constants
+# PYGAME Constatns
 WIDTH, HEIGHT = 600, 600
 ROWS, COLS = 3, 3
 CELL_SIZE = WIDTH // COLS
+CENTER = WIDTH//2
 FPS = 30
 
-
-# Colors
+# COLORS
 WHITE = (255, 255, 255)
 GREY = (100, 100, 100)
 GREEN = (0, 255, 0)
 RED = (255, 0, 0)
-CAR_COLOR = (0, 0, 255)
 BLACK = (0, 0, 0)
+CAR_COLOR = (0, 0, 255)
+
+# GRASS Properties
+GRASS_BOX_SIZE = 225
+
+# LANE Properties
+LANE_WIDTH = 5
+LANE_AREA_WIDTH = WIDTH - 2 * GRASS_BOX_SIZE
+LANE_LENGTH = 200
+
+# CAR Properties
+CAR_SIZE = 20
+CAR_SPEED = 2
