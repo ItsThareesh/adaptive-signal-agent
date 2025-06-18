@@ -45,3 +45,25 @@ def show_fps(screen, clock):
     fps = int(clock.get_fps())
     fps_text = font.render(f'FPS: {fps}', True, (0, 0, 0))
     screen.blit(fps_text, (10, 10))
+
+
+def draw_stop_lines(screen):
+    half_lane = ui_constants.LANE_AREA_WIDTH // 2
+    stop_line_len = 60
+    color = ui_constants.UI_COLORS['WHITE']
+
+    # North-bound stop line
+    pygame.draw.line(screen, color, (ui_constants.CENTER - stop_line_len, ui_constants.CENTER - half_lane),
+                     (ui_constants.CENTER + stop_line_len, ui_constants.CENTER - half_lane), 2)
+
+    # South-bound
+    pygame.draw.line(screen, color, (ui_constants.CENTER - stop_line_len, ui_constants.CENTER + half_lane),
+                     (ui_constants.CENTER + stop_line_len, ui_constants.CENTER + half_lane), 2)
+
+    # West-bound
+    pygame.draw.line(screen, color, (ui_constants.CENTER - half_lane, ui_constants.CENTER - stop_line_len),
+                     (ui_constants.CENTER - half_lane, ui_constants.CENTER + stop_line_len), 2)
+
+    # East-bound
+    pygame.draw.line(screen, color, (ui_constants.CENTER + half_lane, ui_constants.CENTER - stop_line_len),
+                     (ui_constants.CENTER + half_lane, ui_constants.CENTER + stop_line_len), 2)

@@ -1,7 +1,8 @@
 import pygame
 import sys
-from ui.draw import draw_edge_green_boxes, draw_lanes, show_fps
+from ui.draw import draw_edge_green_boxes, draw_lanes, show_fps, draw_stop_lines
 from ui import ui_constants
+from game.traffic_light import TrafficLight
 from game.car_spawner import CarSpawner
 from utils.logger import logger
 
@@ -12,7 +13,8 @@ pygame.display.set_caption("Traffic Intersection Simulation")
 clock = pygame.time.Clock()
 
 # Create Instances
-spawner = CarSpawner()
+spawner = CarSpawner(max_cars=5)
+traffic_lights = [TrafficLight(d) for d in ['N', 'S', 'W', 'E']]
 
 
 def main():
@@ -29,10 +31,14 @@ def main():
         # Draw UI elements
         draw_edge_green_boxes(screen)
         draw_lanes(screen)
+        draw_stop_lines(screen)
 
-        # Spawn Cars
+        # # Spawn Cars
+        # for tl in traffic_lights:
+        #     tl.update()
+
         spawner.maybe_spawn_car()
-        spawner.update_cars(screen)
+        spawner.update_cars(screen, traffic_lights)
 
         # Show FPS
         show_fps(screen, clock)

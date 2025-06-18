@@ -2,27 +2,27 @@ import pygame
 import logging
 import random
 from ui import ui_constants
-from game import game_constants
+from . import game_constants
 
 
 class Car:
     def __init__(self, direction):
+        self.ID = 0
         self.direction = direction
         self.color = random.choice(list(ui_constants.CAR_COLORS.values()))
-
-        self.logger = logging.getLogger(__name__)
+        self.stopped = False
 
         self._decide_direction()
 
     def _decide_direction(self):
-        if self.direction == 'N':
+        if self.direction == 'S':
             self.x = random.choice([ui_constants.CENTER - ui_constants.LANE_AREA_WIDTH // 4,
                                    ui_constants.CENTER + ui_constants.LANE_AREA_WIDTH // 4])
             self.y = ui_constants.HEIGHT
             self.vx = 0
             self.vy = -game_constants.CAR_SPEED
 
-        elif self.direction == 'S':
+        elif self.direction == 'N':
             self.x = random.choice([ui_constants.CENTER - ui_constants.LANE_AREA_WIDTH // 4,
                                    ui_constants.CENTER + ui_constants.LANE_AREA_WIDTH // 4])
             self.y = 0
