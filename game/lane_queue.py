@@ -11,5 +11,14 @@ class LaneQueue:
     def dequeue(self, lane: int):
         return self.queue[lane].pop(0) if self.queue else None
 
-    def front(self, lane: int):
+    def peek(self, lane: int):
         return self.queue[lane][0] if self.queue else None
+
+    def get_front_car(self, car: Car):
+        lane_queue = self.queue[car.lane]
+
+        idx = lane_queue.index(car)
+        if idx > 0:
+            return lane_queue[idx - 1]
+
+        return None

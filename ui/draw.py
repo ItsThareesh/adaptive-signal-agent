@@ -40,7 +40,7 @@ def draw_lanes(screen):
 
 
 def show_fps(screen, clock):
-    font = pygame.font.SysFont(None, 24)
+    font = pygame.font.SysFont("Arial", 16)
 
     fps = int(clock.get_fps())
     fps_text = font.render(f'FPS: {fps}', True, (0, 0, 0))

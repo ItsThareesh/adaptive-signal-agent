@@ -1,16 +1,16 @@
 import random
 from .car import Car
-from .traffic_light import TrafficLight
-from . import game_constants as game_constants, car
+from . import game_constants as game_constants
 from utils.logger import logger
 
 
 class CarSpawner:
-    def __init__(self, max_cars=10):
+    def __init__(self, max_cars:int = 10, enable_log:bool = False):
         self.cars: list[Car] = []
-        self.total_cars = 0
         self.max_cars = max_cars
+        self.total_cars = 0
         self.cooldown_timer = 0
+        self.enable_logs = enable_log
 
     def maybe_spawn_car(self, lane_queues: dict):
         if self.cooldown_timer > 0:
@@ -29,37 +29,8 @@ class CarSpawner:
         self.total_cars += 1
         new_car.ID = self.total_cars
 
-        logger.info(f"Spawning Car {new_car.ID} heading {direction}")  # Log the information
+        if self.enable_logs:
+            logger.info(f"Spawning Car {new_car.ID} heading {direction}")  # Log the information
 
         lane_queues[new_car.direction].enqueue(new_car)
         self.cars.append(new_car)
-
-    # def is_car_ahead(self, car: Car, lane_threshold: int = 10, distance_threshold: int = 40):
-    #     for other in self.cars:
-    #         if car == other:
-    #             continue
-    #         if car.direction != other.direction:
-    #             continue
-
-    #         if car.direction in ['N', 'S']:
-    #             same_lane = abs(car.x - other.x) < lane_threshold
-    #         else:
-    #             same_lane = abs(car.y - other.y) < lane_threshold
-
-    #         if not same_lane:
-    #             continue
-
-    #         if car.direction == 'N':
-    #             if other.y < car.y and abs(car.y - other.y) < distance_threshold:
-    #                 return True
-    #         elif car.direction == 'S':
-    #             if other.y > car.y and abs(car.y - other.y) < distance_threshold:
-    #                 return True
-    #         elif car.direction == 'W':
-    #             if other.x < car.x and abs(car.x - other.x) < distance_threshold:
-    #                 return True
-    #         elif car.direction == 'E':
-    #             if other.x > car.x and abs(car.x - other.x) < distance_threshold:
-    #                 return True
-
-    #     return False

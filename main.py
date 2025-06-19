@@ -13,18 +13,17 @@ screen = pygame.display.set_mode((ui_constants.WIDTH, ui_constants.HEIGHT))
 pygame.display.set_caption("Traffic Intersection Simulation")
 clock = pygame.time.Clock()
 
-# Create Instances
-traffic_lights = [TrafficLight(d) for d in ['N']]
-
-spawner = CarSpawner(max_cars=5, )
-controller = CarsController(spawner.cars, traffic_lights)
-
 
 def main():
     running = True
     paused = False
 
     logger.info("Started App!")
+
+    # Create Instances
+    traffic_lights = [TrafficLight(d) for d in ['N']]
+    spawner = CarSpawner(max_cars=5)
+    controller = CarsController(spawner.cars, traffic_lights)
 
     while running:
         screen.fill(ui_constants.UI_COLORS['BLACK'])
@@ -44,11 +43,12 @@ def main():
             draw_lanes(screen)
             draw_stop_lines(screen)
 
-            # Spawn Cars
+            spawner.maybe_spawn_car(controller.lane_queues)
+
+            # Switch Lights
             for tl in traffic_lights:
                 tl.update()
 
-            spawner.maybe_spawn_car(controller.lane_queues)
             controller.update_cars(screen)
 
             # Show FPS

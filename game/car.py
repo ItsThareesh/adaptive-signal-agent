@@ -11,7 +11,7 @@ class Car:
         self.direction = direction
         self.color = random.choice(list(ui_constants.CAR_COLORS.values()))
         self.spawned = True
-        self.stopped_at_light = False
+        # self.stopped_at_light = False
         self.lane = random.choice([0, 1])  # 0 is for the left most or the top most lane for each road... And 1 is the other lane
 
         self._decide_direction()
