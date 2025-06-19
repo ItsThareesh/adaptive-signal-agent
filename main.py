@@ -1,6 +1,6 @@
 import pygame
 import sys
-from ui.draw import draw_edge_green_boxes, draw_lanes, show_fps, draw_stop_lines
+from ui.draw import draw_edge_green_boxes, draw_lanes, draw_stop_lines, draw_traffic_lights, show_fps
 from ui import ui_constants
 from game.traffic_light import TrafficLight
 from game.car_spawner import CarSpawner
@@ -42,6 +42,7 @@ def main():
             draw_edge_green_boxes(screen)
             draw_lanes(screen)
             draw_stop_lines(screen)
+            draw_traffic_lights(screen, traffic_lights)
 
             spawner.maybe_spawn_car(controller.lane_queues)
 

@@ -19,7 +19,8 @@ UI_COLORS = {
     'BLACK': (0, 0, 0),
     'WHITE': (255, 255, 255),
     'GREY': (100, 100, 100),
-    'GREEN': (50, 205, 50)
+    'GREEN': (50, 205, 50),
+    'RED': (220, 20, 60),
 }
 
 # GRASS Properties
