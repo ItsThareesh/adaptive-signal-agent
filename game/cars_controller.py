@@ -14,29 +14,36 @@ class CarsController:
         self._initialize_lane_queue()
 
     def _initialize_lane_queue(self):
-        for i in ['N', 'S', 'W', 'E']:
-            self.lane_queues[i] = LaneQueue()
+        for dirctn in ['N', 'S', 'W', 'E']:
+            self.lane_queues[dirctn] = LaneQueue()
 
     def update_cars(self, screen):
         self._remove_out_of_bounds()
 
         for car in self.cars:
+            should_stop = False
+
             for tl in self.traffic_lights:
+                if tl.direction != car.direction:
+                    continue
+
                 if self._should_car_stop(tl, car):
                     if self.lane_queues[car.direction].peek(car.lane) == car and self._is_close_to_light(tl, car):
+                        should_stop = True
                         break
                     else:
                         if self._is_close_to_light(tl, car):
+                            should_stop = True
                             break
                         else:
                             front_car = self.lane_queues[car.direction].get_front_car(car)
 
                             if front_car and self._too_close_to_other(car, front_car):
+                                should_stop = True
                                 break
-                            else:
-                                car.move()
-                else:
-                    car.move()
+
+            if not should_stop:
+                car.move()
 
             car.draw(screen)
 
@@ -47,6 +54,10 @@ class CarsController:
         else:
             return abs(car.x - front_car.x) < min_gap
 
+    """
+    Checks if the car crosses a threshold distance for it to stop, so that the cars stop at exactly the same line 
+    near the traffic light. 
+    """
     @staticmethod
     def _is_close_to_light(tl: TrafficLight, car: Car):
         stop_margin = 25
@@ -54,7 +65,7 @@ class CarsController:
         if tl.direction == 'N':
             stop_line_y = ui_constants.CENTER - ui_constants.LANE_AREA_WIDTH // 2
 
-            if stop_line_y - stop_margin <= car.y:
+            if car.y >= stop_line_y - stop_margin:
                 return True
 
         elif tl.direction == 'S':
@@ -66,7 +77,7 @@ class CarsController:
         elif tl.direction == 'W':
             stop_line_x = ui_constants.CENTER - ui_constants.LANE_AREA_WIDTH // 2
 
-            if stop_line_x - stop_margin <= car.x :
+            if car.x >= stop_line_x - stop_margin:
                 return True
 
         elif tl.direction == 'E':
@@ -77,11 +88,9 @@ class CarsController:
 
         return False
 
+    """Checks if the given car's position is before the traffic light in appropriate direction (when it's RED)"""
     @staticmethod
     def _should_car_stop(tl, car: Car) -> bool:
-        if tl.direction != car.direction:
-            return False
-
         stop_margin = 25
 
         if tl.state == 'RED':

@@ -22,7 +22,7 @@ class CarSpawner:
             self.cooldown_timer = game_constants.COOLDOWN_TIMER
 
     def spawn_car(self, lane_queues: dict):
-        direction = random.choice(['W'])
+        direction = random.choice(['N', 'S', 'W', 'E'])
 
         # Create the Car instance
         new_car = Car(direction)
