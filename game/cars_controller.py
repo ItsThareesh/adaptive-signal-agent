@@ -60,19 +60,19 @@ class CarsController:
         elif tl.direction == 'S':
             stop_line_y = ui_constants.CENTER + ui_constants.LANE_AREA_WIDTH // 2
 
-            if stop_line_y + stop_margin <= car.y:
+            if car.y <= stop_line_y + stop_margin:
                 return True
 
         elif tl.direction == 'W':
             stop_line_x = ui_constants.CENTER - ui_constants.LANE_AREA_WIDTH // 2
 
-            if stop_line_x + stop_margin <= car.x :
+            if stop_line_x - stop_margin <= car.x :
                 return True
 
         elif tl.direction == 'E':
             stop_line_x = ui_constants.CENTER + ui_constants.LANE_AREA_WIDTH // 2
 
-            if stop_line_x - stop_margin <= car.x:
+            if car.x <= stop_line_x + stop_margin:
                 return True
 
         return False
@@ -100,13 +100,13 @@ class CarsController:
             elif tl.direction == 'W':
                 stop_line_x = ui_constants.CENTER - ui_constants.LANE_AREA_WIDTH // 2
 
-                if car.x <= stop_line_x + stop_margin:
+                if car.x <= stop_line_x - stop_margin:
                     return True
 
             elif tl.direction == 'E':
                 stop_line_x = ui_constants.CENTER + ui_constants.LANE_AREA_WIDTH // 2
 
-                if car.x >= stop_line_x - stop_margin:
+                if car.x >= stop_line_x + stop_margin:
                     return True
 
         return False

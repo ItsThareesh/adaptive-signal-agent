@@ -1,5 +1,5 @@
 import pygame
-import logging
+from utils.logger import logger
 import random
 from ui import ui_constants
 from . import game_constants
@@ -11,7 +11,6 @@ class Car:
         self.direction = direction
         self.color = random.choice(list(ui_constants.CAR_COLORS.values()))
         self.spawned = True
-        # self.stopped_at_light = False
         self.lane = random.choice([0, 1])  # 0 is for the left most or the top most lane for each road... And 1 is the other lane
 
         self._decide_direction()
@@ -60,7 +59,7 @@ class Car:
             self.vy = 0
 
         else:
-            self.logger.fatal(f"Invalid direction: {self.direction}")
+            logger.fatal(f"Invalid direction: {self.direction}")
             raise
 
     def is_out_of_bounds(self):

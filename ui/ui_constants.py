@@ -1,4 +1,4 @@
-# PYGAME Constatns
+# PYGAME Constants
 WIDTH, HEIGHT = 600, 600
 ROWS, COLS = 3, 3
 CELL_SIZE = WIDTH // COLS

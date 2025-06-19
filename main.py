@@ -21,8 +21,8 @@ def main():
     logger.info("Started App!")
 
     # Create Instances
-    traffic_lights = [TrafficLight(d) for d in ['N']]
-    spawner = CarSpawner(max_cars=5)
+    traffic_lights = [TrafficLight(d) for d in ['W']]
+    spawner = CarSpawner(max_cars=15)
     controller = CarsController(spawner.cars, traffic_lights)
 
     while running:

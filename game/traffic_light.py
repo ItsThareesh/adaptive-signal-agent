@@ -20,10 +20,10 @@ class TrafficLight:
 
         if self.state == 'RED' and elapsed_time > self.red_duration:
             self.state = 'GREEN'
-            logger.info(f"Switched Signal at {self.direction} from RED to GREEN")  # Log Information
+            logger.info(f"Changed {self.direction} Signal from RED to GREEN")  # Log Information
             self.last_switch_time = time.time()
 
         elif self.state == 'GREEN' and elapsed_time > self.green_duration:
             self.state = 'RED'
-            logger.info(f"Switched Signal at {self.direction} from GREEN to RED")  # Log Information
+            logger.info(f"Changed Signal at {self.direction} from GREEN to RED")  # Log Information
             self.last_switch_time = time.time()
