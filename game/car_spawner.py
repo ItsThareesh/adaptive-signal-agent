@@ -1,58 +1,65 @@
 import random
 from .car import Car
 from .traffic_light import TrafficLight
-from . import game_constants as game_constants
+from . import game_constants as game_constants, car
 from utils.logger import logger
 
 
 class CarSpawner:
     def __init__(self, max_cars=10):
-        self.cars = []
+        self.cars: list[Car] = []
         self.total_cars = 0
         self.max_cars = max_cars
         self.cooldown_timer = 0
 
-    def maybe_spawn_car(self):
+    def maybe_spawn_car(self, lane_queues: dict):
         if self.cooldown_timer > 0:
             self.cooldown_timer -= 1
             return
 
         if random.random() < game_constants.SPAWN_PROBABILITY and len(self.cars) < self.max_cars:
-            self.spawn_car()
+            self.spawn_car(lane_queues)
             self.cooldown_timer = game_constants.COOLDOWN_TIMER
 
-    def spawn_car(self):
-        direction = random.choice(['N', 'S', 'E', 'W'])
+    def spawn_car(self, lane_queues: dict):
+        direction = random.choice(['N'])
 
         # Create the Car instance
-        car = Car(direction)
+        new_car = Car(direction)
         self.total_cars += 1
-        car.ID = self.total_cars
+        new_car.ID = self.total_cars
 
-        logger.info(f"Spawning Car {car.ID} heading {direction}")  # Log the information
+        logger.info(f"Spawning Car {new_car.ID} heading {direction}")  # Log the information
 
-        self.cars.append(car)
+        lane_queues[new_car.direction].enqueue(new_car)
+        self.cars.append(new_car)
 
-    def update_cars(self, screen, traffic_lights: list[TrafficLight]):
-        for car in self.cars:
-            relevant_light = next((tl for tl in traffic_lights if tl.direction == car.direction), None)
+    # def is_car_ahead(self, car: Car, lane_threshold: int = 10, distance_threshold: int = 40):
+    #     for other in self.cars:
+    #         if car == other:
+    #             continue
+    #         if car.direction != other.direction:
+    #             continue
 
-            should_stop = relevant_light.should_car_stop(car) if relevant_light else False
+    #         if car.direction in ['N', 'S']:
+    #             same_lane = abs(car.x - other.x) < lane_threshold
+    #         else:
+    #             same_lane = abs(car.y - other.y) < lane_threshold
 
-            if should_stop:
-                if car.stopped == False:
-                    logger.info(f"Car {car.ID} stopped at Traffic Light")
-                    car.stopped = True
+    #         if not same_lane:
+    #             continue
 
-            else:
-                car.move()
-                if car.stopped:
-                    logger.info(f"Car {car.ID} resumed from {car.direction}")
+    #         if car.direction == 'N':
+    #             if other.y < car.y and abs(car.y - other.y) < distance_threshold:
+    #                 return True
+    #         elif car.direction == 'S':
+    #             if other.y > car.y and abs(car.y - other.y) < distance_threshold:
+    #                 return True
+    #         elif car.direction == 'W':
+    #             if other.x < car.x and abs(car.x - other.x) < distance_threshold:
+    #                 return True
+    #         elif car.direction == 'E':
+    #             if other.x > car.x and abs(car.x - other.x) < distance_threshold:
+    #                 return True
 
-                car.stopped = False
-
-            car.draw(screen)
-
-            if car.is_out_of_bounds():
-                self.cars.remove(car)
-                logger.info(f"Removed Car {car.ID}")  # Log the information
+    #     return False

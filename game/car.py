@@ -6,40 +6,56 @@ from . import game_constants
 
 
 class Car:
-    def __init__(self, direction):
+    def __init__(self, direction: str):
         self.ID = 0
         self.direction = direction
         self.color = random.choice(list(ui_constants.CAR_COLORS.values()))
-        self.stopped = False
+        self.spawned = True
+        self.stopped_at_light = False
+        self.lane = random.choice([0, 1])  # 0 is for the left most or the top most lane for each road... And 1 is the other lane
 
         self._decide_direction()
 
     def _decide_direction(self):
         if self.direction == 'S':
-            self.x = random.choice([ui_constants.CENTER - ui_constants.LANE_AREA_WIDTH // 4,
-                                   ui_constants.CENTER + ui_constants.LANE_AREA_WIDTH // 4])
+            if self.lane == 0:
+                self.x = ui_constants.CENTER - ui_constants.LANE_AREA_WIDTH // 4
+            else:
+                self.x = ui_constants.CENTER + ui_constants.LANE_AREA_WIDTH // 4
+
             self.y = ui_constants.HEIGHT
             self.vx = 0
             self.vy = -game_constants.CAR_SPEED
 
         elif self.direction == 'N':
-            self.x = random.choice([ui_constants.CENTER - ui_constants.LANE_AREA_WIDTH // 4,
-                                   ui_constants.CENTER + ui_constants.LANE_AREA_WIDTH // 4])
+            if self.lane == 0:
+                self.x = ui_constants.CENTER - ui_constants.LANE_AREA_WIDTH // 4
+            else:
+                self. x = ui_constants.CENTER + ui_constants.LANE_AREA_WIDTH // 4
+
             self.y = 0
             self.vx = 0
             self.vy = game_constants.CAR_SPEED
 
         elif self.direction == 'W':
             self.x = 0
-            self.y = random.choice([ui_constants.CENTER - ui_constants.LANE_AREA_WIDTH // 4,
-                                   ui_constants.CENTER + ui_constants.LANE_AREA_WIDTH // 4])
+
+            if self.lane == 0:
+                self.y = ui_constants.CENTER - ui_constants.LANE_AREA_WIDTH // 4
+            else:
+                self.y = ui_constants.CENTER + ui_constants.LANE_AREA_WIDTH // 4
+
             self.vx = game_constants.CAR_SPEED
             self.vy = 0
 
         elif self.direction == 'E':
             self.x = ui_constants.WIDTH
-            self.y = random.choice([ui_constants.CENTER - ui_constants.LANE_AREA_WIDTH // 4,
-                                   ui_constants.CENTER + ui_constants.LANE_AREA_WIDTH // 4])
+
+            if self.lane == 0:
+                self.y = ui_constants.CENTER - ui_constants.LANE_AREA_WIDTH // 4
+            else:
+                self.y = ui_constants.CENTER + ui_constants.LANE_AREA_WIDTH // 4
+
             self.vx = -game_constants.CAR_SPEED
             self.vy = 0
 

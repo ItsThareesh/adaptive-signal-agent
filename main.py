@@ -4,6 +4,7 @@ from ui.draw import draw_edge_green_boxes, draw_lanes, show_fps, draw_stop_lines
 from ui import ui_constants
 from game.traffic_light import TrafficLight
 from game.car_spawner import CarSpawner
+from game.cars_controller import CarsController
 from utils.logger import logger
 
 # Pygame setup
@@ -13,12 +14,16 @@ pygame.display.set_caption("Traffic Intersection Simulation")
 clock = pygame.time.Clock()
 
 # Create Instances
-spawner = CarSpawner(max_cars=5)
-traffic_lights = [TrafficLight(d) for d in ['N', 'S', 'W', 'E']]
+traffic_lights = [TrafficLight(d) for d in ['N']]
+
+spawner = CarSpawner(max_cars=5, )
+controller = CarsController(spawner.cars, traffic_lights)
 
 
 def main():
     running = True
+    paused = False
+
     logger.info("Started App!")
 
     while running:
@@ -28,24 +33,31 @@ def main():
             if event.type == pygame.QUIT:
                 running = False
 
-        # Draw UI elements
-        draw_edge_green_boxes(screen)
-        draw_lanes(screen)
-        draw_stop_lines(screen)
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_SPACE:
+                    paused = not paused
+                    logger.info("Paused" if paused else "Resumed")
 
-        # # Spawn Cars
-        # for tl in traffic_lights:
-        #     tl.update()
+        if not paused:
+            # Draw UI elements
+            draw_edge_green_boxes(screen)
+            draw_lanes(screen)
+            draw_stop_lines(screen)
 
-        spawner.maybe_spawn_car()
-        spawner.update_cars(screen, traffic_lights)
+            # Spawn Cars
+            for tl in traffic_lights:
+                tl.update()
 
-        # Show FPS
-        show_fps(screen, clock)
+            spawner.maybe_spawn_car(controller.lane_queues)
+            controller.update_cars(screen)
 
-        # Update the display
-        pygame.display.flip()
-        clock.tick(ui_constants.FPS)
+            # Show FPS
+            show_fps(screen, clock)
+
+            # Update the display
+            pygame.display.flip()
+            clock.tick(ui_constants.FPS)
+
 
     pygame.quit()
     sys.exit()
