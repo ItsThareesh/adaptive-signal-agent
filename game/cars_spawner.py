@@ -4,7 +4,7 @@ from . import game_constants as game_constants
 from utils.logger import logger
 
 
-class CarSpawner:
+class CarsSpawner:
     def __init__(self, max_cars:int = 10, enable_log:bool = False):
         self.cars: list[Car] = []
         self.max_cars = max_cars

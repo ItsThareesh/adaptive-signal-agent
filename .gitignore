@@ -3,5 +3,4 @@ __pycache__
 .idea
 *.ipynb
 q-learning.py
-ui/intersection.py
-ui/traffic_light.py
+model/
