@@ -4,87 +4,98 @@ from . import ui_constants
 
 
 def draw_edge_green_boxes(screen):
-    width, ui_constants.HEIGHT = ui_constants.WIDTH, ui_constants.HEIGHT
+    width, height = ui_constants.WIDTH, ui_constants.HEIGHT
+    grass_bos_size = ui_constants.GRASS_BOX_SIZE
 
     # Top Left Corner
-    top_left_rect = pygame.Rect(0, 0, ui_constants.GRASS_BOX_SIZE, ui_constants.GRASS_BOX_SIZE)
+    top_left_rect = pygame.Rect(0, 0, grass_bos_size, grass_bos_size)
 
     # Bottom Left Corner
-    bottom_left_rect = pygame.Rect(0, ui_constants.HEIGHT - ui_constants.GRASS_BOX_SIZE,
-                                   ui_constants.GRASS_BOX_SIZE, ui_constants.GRASS_BOX_SIZE)
+    bottom_left_rect = pygame.Rect(0, height - grass_bos_size,
+                                   grass_bos_size, grass_bos_size)
 
     # Top Right center
-    top_right_rect = pygame.Rect(ui_constants.WIDTH - ui_constants.GRASS_BOX_SIZE, 0,
-                                 ui_constants.GRASS_BOX_SIZE, ui_constants.GRASS_BOX_SIZE)
+    top_right_rect = pygame.Rect(ui_constants.WIDTH - grass_bos_size, 0,
+                                 grass_bos_size, grass_bos_size)
 
     # Bottom Right center
-    bottom_right_rect = pygame.Rect(ui_constants.WIDTH - ui_constants.GRASS_BOX_SIZE, ui_constants.HEIGHT -
-                                    ui_constants.GRASS_BOX_SIZE, ui_constants.GRASS_BOX_SIZE, ui_constants.GRASS_BOX_SIZE)
+    bottom_right_rect = pygame.Rect(ui_constants.WIDTH - grass_bos_size, height -
+                                    grass_bos_size, grass_bos_size, grass_bos_size)
 
     for box in [top_left_rect, bottom_left_rect, top_right_rect, bottom_right_rect]:
         pygame.draw.rect(screen, ui_constants.UI_COLORS['GREEN'], box)
 
 
 def draw_lanes(screen):
+    height = ui_constants.HEIGHT
+    center = ui_constants.CENTER
+    lane_line_width_offset = ui_constants.LANE_LINE_WIDTH
+    lane_line_length = ui_constants.LANE_LENGTH
+
     # Vertical lanes (North & South)
-    north_lane = pygame.Rect(ui_constants.CENTER - ui_constants.LANE_WIDTH, 0, ui_constants.LANE_WIDTH, ui_constants.LANE_LENGTH)
-    south_lane = pygame.Rect(ui_constants.CENTER - ui_constants.LANE_WIDTH, ui_constants.HEIGHT - ui_constants.LANE_LENGTH,
-                             ui_constants.LANE_WIDTH, ui_constants.LANE_LENGTH)
+    north_lane = pygame.Rect(center - lane_line_width_offset // 2, 0, lane_line_width_offset, lane_line_length)
+    south_lane = pygame.Rect(center - lane_line_width_offset // 2, height - lane_line_length,
+                             lane_line_width_offset, lane_line_length)
 
     # Horizontal lanes (West & East)
-    west_lane = pygame.Rect(0, ui_constants.CENTER - ui_constants.LANE_WIDTH, ui_constants.LANE_LENGTH, ui_constants.LANE_WIDTH)
-    east_lane = pygame.Rect(ui_constants.WIDTH - ui_constants.LANE_LENGTH, ui_constants.CENTER - ui_constants.LANE_WIDTH,
-                            ui_constants.LANE_LENGTH, ui_constants.LANE_WIDTH)
+    west_lane = pygame.Rect(0, center - lane_line_width_offset // 2, lane_line_length, lane_line_width_offset)
+    east_lane = pygame.Rect(ui_constants.WIDTH - lane_line_length, center - lane_line_width_offset // 2,
+                            lane_line_length, lane_line_width_offset)
 
     for lane in [north_lane, south_lane, west_lane, east_lane]:
         pygame.draw.rect(screen, ui_constants.UI_COLORS['GREY'], lane)
 
 
 def draw_stop_lines(screen):
-    half_lane = ui_constants.LANE_AREA_WIDTH // 2
-    stop_line_len = 60
     color = ui_constants.UI_COLORS['WHITE']
 
+    stop_line_len = 60
+    center = ui_constants.CENTER
+    half_lane_dst = ui_constants.LANE_AREA_WIDTH // 2
+
     # North-bound stop line
-    pygame.draw.line(screen, color, (ui_constants.CENTER - stop_line_len, ui_constants.CENTER - half_lane),
-                     (ui_constants.CENTER + stop_line_len, ui_constants.CENTER - half_lane), 2)
+    pygame.draw.line(screen, color, (center - stop_line_len, center - half_lane_dst),
+                     (center + stop_line_len, center - half_lane_dst), 2)
 
     # South-bound
-    pygame.draw.line(screen, color, (ui_constants.CENTER - stop_line_len, ui_constants.CENTER + half_lane),
-                     (ui_constants.CENTER + stop_line_len, ui_constants.CENTER + half_lane), 2)
+    pygame.draw.line(screen, color, (center - stop_line_len, center + half_lane_dst),
+                     (center + stop_line_len, center + half_lane_dst), 2)
 
     # West-bound
-    pygame.draw.line(screen, color, (ui_constants.CENTER - half_lane, ui_constants.CENTER - stop_line_len),
-                     (ui_constants.CENTER - half_lane, ui_constants.CENTER + stop_line_len), 2)
+    pygame.draw.line(screen, color, (center - half_lane_dst, center - stop_line_len),
+                     (center - half_lane_dst, center + stop_line_len), 2)
 
     # East-bound
-    pygame.draw.line(screen, color, (ui_constants.CENTER + half_lane, ui_constants.CENTER - stop_line_len),
-                     (ui_constants.CENTER + half_lane, ui_constants.CENTER + stop_line_len), 2)
+    pygame.draw.line(screen, color, (center + half_lane_dst, center - stop_line_len),
+                     (center + half_lane_dst, center + stop_line_len), 2)
 
 
 def draw_traffic_lights(screen, traffic_lights: list[TrafficLight]):
     radius = 10
-    padding = 15
+    padding = 17
     x, y = 0, 0
+
+    center = ui_constants.CENTER
+    half_lane_dst = ui_constants.LANE_AREA_WIDTH // 2
 
     for tl in traffic_lights:
         color = ui_constants.UI_COLORS['GREEN'] if tl.state == 'GREEN' else ui_constants.UI_COLORS['RED']
 
         if tl.direction == 'N':
-            x = ui_constants.CENTER - radius // 4
-            y = ui_constants.CENTER - ui_constants.LANE_AREA_WIDTH // 2 - padding
+            x = center
+            y = center - half_lane_dst - padding
 
         elif tl.direction == 'S':
-            x = ui_constants.CENTER - radius // 4
-            y = ui_constants.CENTER + ui_constants.LANE_AREA_WIDTH // 2 + padding
+            x = center
+            y = center + half_lane_dst + padding
 
         elif tl.direction == 'E':
-            x = ui_constants.CENTER + ui_constants.LANE_AREA_WIDTH // 2 + padding
-            y = ui_constants.CENTER - radius // 4
+            x = center + half_lane_dst + padding
+            y = center
 
         elif tl.direction == 'W':
-            x = ui_constants.CENTER - ui_constants.LANE_AREA_WIDTH // 2 - padding
-            y = ui_constants.CENTER - radius // 4
+            x = center - half_lane_dst - padding
+            y = center
 
         pygame.draw.circle(screen, color, (x, y), radius)
 
