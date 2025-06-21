@@ -2,7 +2,7 @@
 WIDTH, HEIGHT = 600, 600
 ROWS, COLS = 3, 3
 CELL_SIZE = WIDTH // COLS
-CENTER = WIDTH//2
+CENTER: int = WIDTH//2
 FPS = 30
 
 # COLORS
@@ -19,7 +19,7 @@ UI_COLORS = {
     'BLACK': (0, 0, 0),
     'WHITE': (255, 255, 255),
     'GREY': (100, 100, 100),
-    'GREEN': (50, 205, 50),
+    'GREEN': (30, 185, 30),
     'RED': (220, 20, 60),
 }
 
@@ -27,6 +27,6 @@ UI_COLORS = {
 GRASS_BOX_SIZE = 225
 
 # LANE Properties
-LANE_WIDTH = 5
+LANE_LINE_WIDTH = 3
 LANE_AREA_WIDTH = WIDTH - 2 * GRASS_BOX_SIZE
 LANE_LENGTH = 200
