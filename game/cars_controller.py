@@ -27,12 +27,12 @@ class CarsController:
                 if tl.direction != car.direction:
                     continue
 
-                if self._should_car_stop(tl, car):
-                    if self.lane_queues[car.direction].peek(car.lane) == car and self._is_close_to_light(tl, car):
+                if self._is_before_tl(tl, car):
+                    if (self.lane_queues[car.direction].peek() == car) and self._is_near_tl(tl, car):
                         should_stop = True
                         break
                     else:
-                        if self._is_close_to_light(tl, car):
+                        if self._is_near_tl(tl, car):
                             should_stop = True
                             break
                         else:
@@ -54,12 +54,12 @@ class CarsController:
         else:
             return abs(car.x - front_car.x) < min_gap
 
-    """
-    Checks if the car crosses a threshold distance for it to stop, so that the cars stop at exactly the same line 
-    near the traffic light. 
-    """
     @staticmethod
-    def _is_close_to_light(tl: TrafficLight, car: Car):
+    def _is_near_tl(tl: TrafficLight, car: Car):
+        """
+            Checks if the car crosses a threshold distance for it to stop, so that the cars stop at exactly the same
+            line near the traffic light.
+        """
         stop_margin = 25
 
         if tl.direction == 'N':
@@ -88,9 +88,11 @@ class CarsController:
 
         return False
 
-    """Checks if the given car's position is before the traffic light in appropriate direction (when it's RED)"""
     @staticmethod
-    def _should_car_stop(tl, car: Car) -> bool:
+    def _is_before_tl(tl, car: Car) -> bool:
+        """
+            Checks if the given car's position is before the traffic light in appropriate direction (when it's RED)
+        """
         stop_margin = 25
 
         if tl.state == 'RED':
@@ -126,7 +128,7 @@ class CarsController:
                 logger.info(f"Removed Car {car.ID}")
                 lane_queue = self.lane_queues[car.direction]
 
-                if lane_queue.peek(car.lane) == car:
-                    lane_queue.dequeue(car.lane)
+                if lane_queue.peek() == car:
+                    lane_queue.dequeue()
 
                 self.cars.remove(car)

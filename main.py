@@ -3,7 +3,7 @@ import sys
 from ui.draw import draw_edge_green_boxes, draw_lanes, draw_stop_lines, draw_traffic_lights, show_fps
 from ui import ui_constants
 from game.traffic_light import TrafficLight
-from game.car_spawner import CarSpawner
+from game.cars_spawner import CarsSpawner
 from game.cars_controller import CarsController
 from utils.logger import logger
 
@@ -22,7 +22,7 @@ def main():
 
     # Create Instances
     traffic_lights = [TrafficLight(d) for d in ['N', 'S', 'W', 'E']]
-    spawner = CarSpawner(max_cars=15)
+    spawner = CarsSpawner(max_cars=15)
     controller = CarsController(spawner.cars, traffic_lights)
 
     while running:
