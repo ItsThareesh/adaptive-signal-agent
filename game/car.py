@@ -1,4 +1,6 @@
 import pygame
+
+import ui.ui_constants
 from utils.logger import logger
 import random
 from ui import ui_constants
@@ -15,15 +17,24 @@ class Car:
         self._decide_direction()
 
     def _decide_direction(self):
+        height = ui_constants.HEIGHT
+        width = ui_constants.WIDTH
+        center = ui_constants.CENTER
+
+        lane_width_offset = ui_constants.LANE_WIDTH // 8
+        line_width = ui_constants.LINE_WIDTH
+        line_length = ui_constants.LINE_LENGTH
+        grass_bos_size = ui_constants.GRASS_BOX_SIZE
+
         if self.direction == 'N':
-            self.x = ui_constants.CENTER - ui_constants.LANE_AREA_WIDTH // 4
+            self.x = random.choice([grass_bos_size + lane_width_offset, center - lane_width_offset])
             self.y = 0
 
             self.vx = 0
             self.vy = game_constants.CAR_SPEED
 
         elif self.direction == 'S':
-            self.x = ui_constants.CENTER + ui_constants.LANE_AREA_WIDTH // 4
+            self.x = random.choice([center + lane_width_offset, width - grass_bos_size - lane_width_offset])
             self.y = ui_constants.HEIGHT
 
             self.vx = 0
@@ -31,14 +42,14 @@ class Car:
 
         elif self.direction == 'W':
             self.x = 0
-            self.y = ui_constants.CENTER - ui_constants.LANE_AREA_WIDTH // 4
+            self.y = random.choice([center + lane_width_offset, height - grass_bos_size - lane_width_offset])
 
             self.vx = game_constants.CAR_SPEED
             self.vy = 0
 
         elif self.direction == 'E':
             self.x = ui_constants.WIDTH
-            self.y = ui_constants.CENTER + ui_constants.LANE_AREA_WIDTH // 4
+            self.y = random.choice([grass_bos_size + lane_width_offset, center - lane_width_offset])
 
             self.vx = -game_constants.CAR_SPEED
             self.vy = 0
@@ -63,7 +74,7 @@ class Car:
         self.y += self.vy
 
     def draw(self, screen):
-        rect = pygame.Rect(self.x - game_constants.CAR_SIZE//2, self.y - game_constants.CAR_SIZE//2,
-                           game_constants.CAR_SIZE, game_constants.CAR_SIZE)
+        car_offset = game_constants.CAR_SIZE // 2
 
+        rect = pygame.Rect(self.x - car_offset, self.y - car_offset, game_constants.CAR_SIZE, game_constants.CAR_SIZE)
         pygame.draw.rect(screen, self.color, rect)

@@ -37,13 +37,13 @@ def main():
                     paused = not paused
                     logger.info("Paused" if paused else "Resumed")
 
-        if not paused:
-            # Draw UI elements
-            draw_edge_green_boxes(screen)
-            draw_lanes(screen)
-            draw_stop_lines(screen)
-            draw_traffic_lights(screen, traffic_lights)
+        # Draw UI elements
+        draw_edge_green_boxes(screen)
+        draw_lanes(screen)
+        draw_stop_lines(screen)
+        draw_traffic_lights(screen, traffic_lights)
 
+        if not paused:
             spawner.maybe_spawn_car(controller.lane_queues)
 
             # Switch Lights
