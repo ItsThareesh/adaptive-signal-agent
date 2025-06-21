@@ -94,7 +94,7 @@ def draw_stop_lines(screen):
 
 def draw_traffic_lights(screen, traffic_lights: list[TrafficLight]):
     radius = 10
-    padding = 17
+    padding = 0
     x, y = 0, 0
 
     center = ui_constants.CENTER

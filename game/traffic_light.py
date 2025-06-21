@@ -6,7 +6,7 @@ from utils.logger import logger
 
 class TrafficLight:
     def __init__(self, direction):
-        self.state = random.choice(['GREEN', 'RED', 'TURN_LEFT', 'TURN_RIGHT'])
+        self.state = random.choice(['GREEN', 'RED'])
         self.direction = direction
         self.red_duration = game_constants.RED_DURATION
         self.green_duration = game_constants.GREEN_DURATION
