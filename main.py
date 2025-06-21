@@ -22,7 +22,7 @@ def main():
 
     # Create Instances
     traffic_lights = [TrafficLight(d) for d in ['N', 'S', 'W', 'E']]
-    spawner = CarSpawner(max_cars=15)
+    spawner = CarsSpawner(max_cars=15)
     controller = CarsController(spawner.cars, traffic_lights)
 
     while running:
