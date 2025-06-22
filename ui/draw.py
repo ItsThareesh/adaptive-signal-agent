@@ -11,16 +11,13 @@ def draw_edge_green_boxes(screen):
     top_left_rect = pygame.Rect(0, 0, grass_bos_size, grass_bos_size)
 
     # Bottom Left Corner
-    bottom_left_rect = pygame.Rect(0, height - grass_bos_size,
-                                   grass_bos_size, grass_bos_size)
+    bottom_left_rect = pygame.Rect(0, height - grass_bos_size, grass_bos_size, grass_bos_size)
 
     # Top Right center
-    top_right_rect = pygame.Rect(ui_constants.WIDTH - grass_bos_size, 0,
-                                 grass_bos_size, grass_bos_size)
+    top_right_rect = pygame.Rect(width - grass_bos_size, 0, grass_bos_size, grass_bos_size)
 
     # Bottom Right center
-    bottom_right_rect = pygame.Rect(ui_constants.WIDTH - grass_bos_size, height -
-                                    grass_bos_size, grass_bos_size, grass_bos_size)
+    bottom_right_rect = pygame.Rect(width - grass_bos_size, height - grass_bos_size, grass_bos_size, grass_bos_size)
 
     for box in [top_left_rect, bottom_left_rect, top_right_rect, bottom_right_rect]:
         pygame.draw.rect(screen, ui_constants.UI_COLORS['GREEN'], box)
@@ -28,22 +25,47 @@ def draw_edge_green_boxes(screen):
 
 def draw_lanes(screen):
     height = ui_constants.HEIGHT
-    center = ui_constants.CENTER
-    lane_line_width_offset = ui_constants.LANE_LINE_WIDTH
-    lane_line_length = ui_constants.LANE_LENGTH
+    width = ui_constants.WIDTH
 
-    # Vertical lanes (North & South)
-    north_lane = pygame.Rect(center - lane_line_width_offset // 2, 0, lane_line_width_offset, lane_line_length)
-    south_lane = pygame.Rect(center - lane_line_width_offset // 2, height - lane_line_length,
-                             lane_line_width_offset, lane_line_length)
+    lane_width_offset = ui_constants.LANE_WIDTH // 4
+    line_width = ui_constants.LINE_WIDTH
+    line_length = ui_constants.LINE_LENGTH
+    grass_bos_size = ui_constants.GRASS_BOX_SIZE
 
-    # Horizontal lanes (West & East)
-    west_lane = pygame.Rect(0, center - lane_line_width_offset // 2, lane_line_length, lane_line_width_offset)
-    east_lane = pygame.Rect(ui_constants.WIDTH - lane_line_length, center - lane_line_width_offset // 2,
-                            lane_line_length, lane_line_width_offset)
+    def get_divider_length(iteration: int):
+        if iteration == 2:
+            return line_width * 2
+        else:
+            return line_width
 
-    for lane in [north_lane, south_lane, west_lane, east_lane]:
-        pygame.draw.rect(screen, ui_constants.UI_COLORS['GREY'], lane)
+    # North Lanes
+    for i in range(1, 4):
+        left = grass_bos_size + i * lane_width_offset - line_width // 2
+
+        north_lane_line = pygame.Rect(left, 0, get_divider_length(i), line_length)
+        pygame.draw.rect(screen, ui_constants.UI_COLORS['GREY'], north_lane_line)
+
+    # South Lanes
+    for i in range(1, 4):
+        left = grass_bos_size + i * lane_width_offset - line_width // 2
+
+        south_lane_line = pygame.Rect(left, height - line_length, get_divider_length(i), line_length)
+        pygame.draw.rect(screen, ui_constants.UI_COLORS['GREY'], south_lane_line)
+
+
+    # West Lanes
+    for i in range(1, 4):
+        top = grass_bos_size + i * lane_width_offset - line_width // 2
+
+        west_lane_line = pygame.Rect(0, top, line_length, get_divider_length(i))
+        pygame.draw.rect(screen, ui_constants.UI_COLORS['GREY'], west_lane_line)
+
+    # East Lanes
+    for i in range(1, 4):
+        top = grass_bos_size + i * lane_width_offset - line_width // 2
+
+        east_lane_line = pygame.Rect(width - line_length, top, line_length, get_divider_length(i))
+        pygame.draw.rect(screen, ui_constants.UI_COLORS['GREY'], east_lane_line)
 
 
 def draw_stop_lines(screen):
@@ -51,7 +73,7 @@ def draw_stop_lines(screen):
 
     stop_line_len = 60
     center = ui_constants.CENTER
-    half_lane_dst = ui_constants.LANE_AREA_WIDTH // 2
+    half_lane_dst = ui_constants.LANE_WIDTH // 2
 
     # North-bound stop line
     pygame.draw.line(screen, color, (center - stop_line_len, center - half_lane_dst),
@@ -72,14 +94,19 @@ def draw_stop_lines(screen):
 
 def draw_traffic_lights(screen, traffic_lights: list[TrafficLight]):
     radius = 10
-    padding = 17
+    padding = 0
     x, y = 0, 0
 
     center = ui_constants.CENTER
-    half_lane_dst = ui_constants.LANE_AREA_WIDTH // 2
+    half_lane_dst = ui_constants.LANE_WIDTH // 2
 
     for tl in traffic_lights:
-        color = ui_constants.UI_COLORS['GREEN'] if tl.state == 'GREEN' else ui_constants.UI_COLORS['RED']
+        if tl.state == 'RED':
+            color = ui_constants.UI_COLORS['RED']
+        elif tl.state == 'YELLOW':
+            color = ui_constants.UI_COLORS['YELLOW']
+        elif tl.state == 'GREEN':
+            color = ui_constants.UI_COLORS['GREEN']
 
         if tl.direction == 'N':
             x = center

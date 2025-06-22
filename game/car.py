@@ -1,4 +1,6 @@
 import pygame
+
+import ui.ui_constants
 from utils.logger import logger
 import random
 from ui import ui_constants
@@ -11,36 +13,64 @@ class Car:
         self.direction = direction
         self.color = random.choice(list(ui_constants.CAR_COLORS.values()))
         self.spawned = True
+        # Assume left side driving... Then the right most lane is 0th index and 1st index is left to it
+        self.lane = random.choice([0, 1])
 
         self._decide_direction()
 
     def _decide_direction(self):
-        if self.direction == 'N':
-            self.x = ui_constants.CENTER - ui_constants.LANE_AREA_WIDTH // 4
-            self.y = 0
+        height = ui_constants.HEIGHT
+        width = ui_constants.WIDTH
+        center = ui_constants.CENTER
 
+        lane_width_offset = ui_constants.LANE_WIDTH // 8
+        grass_bos_size = ui_constants.GRASS_BOX_SIZE
+
+        if self.direction == 'N':
+            if self.lane == 0:
+                self.x = grass_bos_size + lane_width_offset
+                self.vy = game_constants.CAR_SPEED
+            else:
+                self.x = center - lane_width_offset
+                self.vy = game_constants.CAR_SPEED * 1.25
+
+            self.y = 0
             self.vx = 0
-            self.vy = game_constants.CAR_SPEED
 
         elif self.direction == 'S':
-            self.x = ui_constants.CENTER + ui_constants.LANE_AREA_WIDTH // 4
+            if self.lane == 0:
+                self.x = width - grass_bos_size - lane_width_offset
+                self.vy = -game_constants.CAR_SPEED
+            else:
+                self.x = center + lane_width_offset
+                self.vy = -game_constants.CAR_SPEED * 1.25
+
             self.y = ui_constants.HEIGHT
 
             self.vx = 0
-            self.vy = -game_constants.CAR_SPEED
 
         elif self.direction == 'W':
             self.x = 0
-            self.y = ui_constants.CENTER - ui_constants.LANE_AREA_WIDTH // 4
 
-            self.vx = game_constants.CAR_SPEED
+            if self.lane == 0:
+                self.y = height - grass_bos_size - lane_width_offset
+                self.vx = game_constants.CAR_SPEED
+            else:
+                self.y = center + lane_width_offset
+                self.vx = game_constants.CAR_SPEED * 1.25
+
             self.vy = 0
 
         elif self.direction == 'E':
             self.x = ui_constants.WIDTH
-            self.y = ui_constants.CENTER + ui_constants.LANE_AREA_WIDTH // 4
 
-            self.vx = -game_constants.CAR_SPEED
+            if self.lane == 0:
+                self.y = grass_bos_size + lane_width_offset
+                self.vx = -game_constants.CAR_SPEED
+            else:
+                self.y = center - lane_width_offset
+                self.vx = -game_constants.CAR_SPEED * 1.25
+
             self.vy = 0
 
         else:
@@ -63,7 +93,7 @@ class Car:
         self.y += self.vy
 
     def draw(self, screen):
-        rect = pygame.Rect(self.x - game_constants.CAR_SIZE//2, self.y - game_constants.CAR_SIZE//2,
-                           game_constants.CAR_SIZE, game_constants.CAR_SIZE)
+        car_offset = game_constants.CAR_SIZE // 2
 
+        rect = pygame.Rect(self.x - car_offset, self.y - car_offset, game_constants.CAR_SIZE, game_constants.CAR_SIZE)
         pygame.draw.rect(screen, self.color, rect)
