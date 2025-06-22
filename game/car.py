@@ -13,6 +13,8 @@ class Car:
         self.direction = direction
         self.color = random.choice(list(ui_constants.CAR_COLORS.values()))
         self.spawned = True
+        # Assume left side driving... Then the right most lane is 0th index and 1st index is left to it
+        self.lane = random.choice([0, 1])
 
         self._decide_direction()
 
@@ -22,19 +24,25 @@ class Car:
         center = ui_constants.CENTER
 
         lane_width_offset = ui_constants.LANE_WIDTH // 8
-        line_width = ui_constants.LINE_WIDTH
-        line_length = ui_constants.LINE_LENGTH
         grass_bos_size = ui_constants.GRASS_BOX_SIZE
 
         if self.direction == 'N':
-            self.x = random.choice([grass_bos_size + lane_width_offset, center - lane_width_offset])
+            if self.lane == 0:
+                self.x = grass_bos_size + lane_width_offset
+            else:
+                self.x = center - lane_width_offset
+
             self.y = 0
 
             self.vx = 0
             self.vy = game_constants.CAR_SPEED
 
         elif self.direction == 'S':
-            self.x = random.choice([center + lane_width_offset, width - grass_bos_size - lane_width_offset])
+            if self.lane == 0:
+                self.x = width - grass_bos_size - lane_width_offset
+            else:
+                self.x = center + lane_width_offset
+
             self.y = ui_constants.HEIGHT
 
             self.vx = 0
@@ -42,14 +50,22 @@ class Car:
 
         elif self.direction == 'W':
             self.x = 0
-            self.y = random.choice([center + lane_width_offset, height - grass_bos_size - lane_width_offset])
+
+            if self.lane == 0:
+                self.y = height - grass_bos_size - lane_width_offset
+            else:
+                self.y = center + lane_width_offset
 
             self.vx = game_constants.CAR_SPEED
             self.vy = 0
 
         elif self.direction == 'E':
             self.x = ui_constants.WIDTH
-            self.y = random.choice([grass_bos_size + lane_width_offset, center - lane_width_offset])
+
+            if self.lane == 0:
+                self.y = grass_bos_size + lane_width_offset
+            else:
+                self.y = center - lane_width_offset
 
             self.vx = -game_constants.CAR_SPEED
             self.vy = 0
