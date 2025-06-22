@@ -8,9 +8,12 @@ class CarsSpawner:
     def __init__(self, max_cars:int = 10, enable_log:bool = False):
         self.cars: list[Car] = []
         self.max_cars = max_cars
-        self.total_cars = 0
         self.cooldown_timer = 0
         self.enable_logs = enable_log
+
+    def get_total_cars(self):
+        """ Helper method for drawing the total cars count on the screen """
+        return len(self.cars)
 
     def maybe_spawn_car(self, lane_queues: dict):
         if self.cooldown_timer > 0:
@@ -26,8 +29,7 @@ class CarsSpawner:
 
         # Create the Car instance
         new_car = Car(direction)
-        self.total_cars += 1
-        new_car.ID = self.total_cars
+        new_car.ID = self.get_total_cars() + 1
 
         if self.enable_logs:
             logger.info(f"Spawning Car {new_car.ID} heading {direction}")  # Log the information

@@ -99,6 +99,7 @@ def draw_traffic_lights(screen, traffic_lights: list[TrafficLight]):
 
     center = ui_constants.CENTER
     half_lane_dst = ui_constants.LANE_WIDTH // 2
+    color = ui_constants.UI_COLORS['RED']
 
     for tl in traffic_lights:
         if tl.state == 'RED':
@@ -133,3 +134,10 @@ def show_fps(screen, clock):
     fps = int(clock.get_fps())
     fps_text = font.render(f'FPS: {fps}', True, (0, 0, 0))
     screen.blit(fps_text, (10, 10))
+
+def show_cars(screen, total_cars):
+    font = pygame.font.SysFont("Arial", 16, True)
+
+    fps = total_cars
+    fps_text = font.render(f'Total Cars: {fps}', True, (0, 0, 0))
+    screen.blit(fps_text, (screen.get_width() - 110, 10))

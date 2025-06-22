@@ -1,6 +1,6 @@
 import pygame
 import sys
-from ui.draw import draw_edge_green_boxes, draw_lanes, draw_stop_lines, draw_traffic_lights, show_fps
+from ui.draw import draw_edge_green_boxes, draw_lanes, draw_stop_lines, draw_traffic_lights, show_fps, show_cars
 from ui import ui_constants
 from game.traffic_light import TrafficLight
 from game.cars_spawner import CarsSpawner
@@ -22,7 +22,7 @@ def main():
 
     # Create Instances
     traffic_lights = [TrafficLight(d) for d in ['N', 'S', 'W', 'E']]
-    spawner = CarsSpawner(max_cars=15)
+    spawner = CarsSpawner(max_cars=30)
     controller = CarsController(spawner.cars, traffic_lights)
 
     while running:
@@ -42,6 +42,7 @@ def main():
         draw_lanes(screen)
         draw_stop_lines(screen)
         draw_traffic_lights(screen, traffic_lights)
+        show_cars(screen, spawner.get_total_cars())
 
         if not paused:
             spawner.maybe_spawn_car(controller.lane_queues)
