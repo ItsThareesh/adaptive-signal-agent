@@ -101,7 +101,12 @@ def draw_traffic_lights(screen, traffic_lights: list[TrafficLight]):
     half_lane_dst = ui_constants.LANE_WIDTH // 2
 
     for tl in traffic_lights:
-        color = ui_constants.UI_COLORS['GREEN'] if tl.state == 'GREEN' else ui_constants.UI_COLORS['RED']
+        if tl.state == 'RED':
+            color = ui_constants.UI_COLORS['RED']
+        elif tl.state == 'YELLOW':
+            color = ui_constants.UI_COLORS['YELLOW']
+        elif tl.state == 'GREEN':
+            color = ui_constants.UI_COLORS['GREEN']
 
         if tl.direction == 'N':
             x = center

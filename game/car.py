@@ -29,34 +29,36 @@ class Car:
         if self.direction == 'N':
             if self.lane == 0:
                 self.x = grass_bos_size + lane_width_offset
+                self.vy = game_constants.CAR_SPEED
             else:
                 self.x = center - lane_width_offset
+                self.vy = game_constants.CAR_SPEED * 1.25
 
             self.y = 0
-
             self.vx = 0
-            self.vy = game_constants.CAR_SPEED
 
         elif self.direction == 'S':
             if self.lane == 0:
                 self.x = width - grass_bos_size - lane_width_offset
+                self.vy = -game_constants.CAR_SPEED
             else:
                 self.x = center + lane_width_offset
+                self.vy = -game_constants.CAR_SPEED * 1.25
 
             self.y = ui_constants.HEIGHT
 
             self.vx = 0
-            self.vy = -game_constants.CAR_SPEED
 
         elif self.direction == 'W':
             self.x = 0
 
             if self.lane == 0:
                 self.y = height - grass_bos_size - lane_width_offset
+                self.vx = game_constants.CAR_SPEED
             else:
                 self.y = center + lane_width_offset
+                self.vx = game_constants.CAR_SPEED * 1.25
 
-            self.vx = game_constants.CAR_SPEED
             self.vy = 0
 
         elif self.direction == 'E':
@@ -64,10 +66,11 @@ class Car:
 
             if self.lane == 0:
                 self.y = grass_bos_size + lane_width_offset
+                self.vx = -game_constants.CAR_SPEED
             else:
                 self.y = center - lane_width_offset
+                self.vx = -game_constants.CAR_SPEED * 1.25
 
-            self.vx = -game_constants.CAR_SPEED
             self.vy = 0
 
         else:
