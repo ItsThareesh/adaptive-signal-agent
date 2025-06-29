@@ -17,8 +17,9 @@ class CarsController:
         for dirctn in ['N', 'S', 'W', 'E']:
             self.lane_queues[dirctn] = LaneQueue()
 
-    def update_cars(self, screen):
+    def update_cars(self, screen, train=False) -> int:
         self._remove_out_of_bounds()
+        cars_passed = 0
 
         for car in self.cars:
             should_stop = False
@@ -28,24 +29,27 @@ class CarsController:
                     continue
 
                 if self._is_before_tl(tl, car):
-                    if (self.lane_queues[car.direction].peek(car.lane) == car) and self._is_near_tl(tl, car):
+                    if self._is_near_tl(tl, car):
                         should_stop = True
                         break
                     else:
-                        if self._is_near_tl(tl, car):
+                        front_car = self.lane_queues[car.direction].get_front_car(car)
+
+                        # Should stop if a car is too close to the car in front of it in the respective lane
+                        if front_car and self._too_close_to_other(car, front_car):
                             should_stop = True
                             break
-                        else:
-                            front_car = self.lane_queues[car.direction].get_front_car(car)
-
-                            if front_car and self._too_close_to_other(car, front_car):
-                                should_stop = True
-                                break
 
             if not should_stop:
                 car.move()
 
-            car.draw(screen)
+            if car.has_crossed_intersection():
+                cars_passed += 1
+
+            if not train:
+                car.draw(screen)
+
+        return cars_passed
 
     @staticmethod
     def _too_close_to_other(car: Car, front_car: Car, min_gap=35):
@@ -55,7 +59,7 @@ class CarsController:
             return abs(car.x - front_car.x) < min_gap
 
     @staticmethod
-    def _is_near_tl(tl: TrafficLight, car: Car):
+    def _is_near_tl(tl: TrafficLight, car: Car) -> bool:
         """
             Checks if the car crosses a threshold distance for it to stop, so that the cars stop at exactly the same
             line near the traffic light.
@@ -123,11 +127,14 @@ class CarsController:
         return False
 
     def _remove_out_of_bounds(self):
-        for car in self.cars:
+        # Creating a shallow copy of self.cars array just in case to prevent RunTime errors
+        for car in self.cars[:]:
             if car.is_out_of_bounds():
                 logger.info(f"Removed Car {car.ID}")
                 lane_queue = self.lane_queues[car.direction]
 
+                # Since I'm running this method on every frame, it's safe to
+                # think that the first car in any lane left the window frame
                 if lane_queue.peek(car.lane) == car:
                     lane_queue.dequeue(car.lane)
 

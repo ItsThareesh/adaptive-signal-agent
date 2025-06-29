@@ -1,0 +1,53 @@
+import numpy as np
+import random
+from collections import defaultdict
+import os
+import pickle
+from utils.logger import logger
+
+class QLearningAgent:
+    def __init__(self, action_space=2, alpha=0.1, gamma=0.9, epsilon=1.0, min_epsilon=0.1, epsilon_decay=0.95):
+        self.action_space = action_space
+        self.q_table = defaultdict(lambda: np.zeros(action_space))
+
+        # Hyperparameters
+        self.alpha = alpha # Learning Rate
+        self.gamma = gamma # Discount Factor
+        self.epsilon = epsilon # Exploration Rate
+        self.min_epsilon = min_epsilon # Min Exploration Rate upon decaying
+        self.epsilon_decay = epsilon_decay # Exploration Decay Rate
+
+    def choose_action(self, state):
+        """
+            Chooses an action with probability epsilon to decide whether to explore or exploit
+        """
+        if random.random() < self.epsilon:
+            return random.randint(0, self.action_space - 1)
+        return np.argmax(self.q_table[state])
+
+    def learn(self, state, action, reward, next_state):
+        max_next_q = np.max(self.q_table[next_state])
+
+        self.q_table[state][action] *= self.alpha
+        self.q_table[state][action] += self.alpha * (reward + self.gamma * max_next_q)
+
+        # logger.info(f"EPSILON: {self.epsilon}")
+        self.epsilon = max(self.epsilon * self.epsilon_decay, self.min_epsilon)
+        # logger.info(f"EPSILON: {self.epsilon} (AFTER UPDATE)")
+
+    def save(self, path='q_table.pkl'):
+        with open(path, 'wb') as f:
+            pickle.dump(dict(self.q_table), f)
+
+        logger.info(f"[+] Q-table saved to '{path}'")
+
+    def load(self, path='q_table.pkl'):
+        if not os.path.exists(path):
+            logger.error(f"[!] Q-table file '{path}' not found.")
+            return
+
+        with open(path, 'rb') as f:
+            raw_table = pickle.load(f)
+            self.q_table = defaultdict(lambda: np.zeros(self.action_space), raw_table)
+
+        logger.info(f"[✓] Q-table loaded from '{path}'")

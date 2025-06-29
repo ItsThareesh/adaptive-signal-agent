@@ -11,7 +11,7 @@ class CarsSpawner:
         self.cooldown_timer = 0
         self.enable_logs = enable_log
 
-    def get_total_cars(self):
+    def get_total_cars(self) -> int:
         """ Helper method for drawing the total cars count on the screen """
         return len(self.cars)
 

@@ -1,6 +1,4 @@
 import pygame
-
-import ui.ui_constants
 from utils.logger import logger
 import random
 from ui import ui_constants
@@ -77,7 +75,8 @@ class Car:
             logger.fatal(f"Invalid direction: {self.direction}")
             raise
 
-    def is_out_of_bounds(self):
+    def is_out_of_bounds(self) -> bool:
+        # Define Box Constraints for determining if it's out of bounds
         left_bound = 0 - game_constants.CAR_SIZE
         right_bound = ui_constants.WIDTH + game_constants.CAR_SIZE
         top_bound = 0 - game_constants.CAR_SIZE
@@ -87,6 +86,21 @@ class Car:
             return True
         else:
             return False
+
+    def has_crossed_intersection(self) -> bool:
+        center = ui_constants.CENTER
+        margin = 50
+
+        if self.direction == 'N' and self.y >= center + margin:
+            return True
+        if self.direction == 'S' and self.y <= center - margin:
+            return True
+        if self.direction == 'E' and self.x <= center - margin:
+            return True
+        if self.direction == 'W' and self.x <= center + margin:
+            return True
+
+        return False
 
     def move(self):
         self.x += self.vx
