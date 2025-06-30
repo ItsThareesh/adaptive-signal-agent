@@ -31,10 +31,6 @@ class QLearningAgent:
         self.q_table[state][action] *= self.alpha
         self.q_table[state][action] += self.alpha * (reward + self.gamma * max_next_q)
 
-        # logger.info(f"EPSILON: {self.epsilon}")
-        self.epsilon = max(self.epsilon * self.epsilon_decay, self.min_epsilon)
-        # logger.info(f"EPSILON: {self.epsilon} (AFTER UPDATE)")
-
     def save(self, path='q_table.pkl'):
         with open(path, 'wb') as f:
             pickle.dump(dict(self.q_table), f)

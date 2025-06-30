@@ -89,15 +89,15 @@ class Car:
 
     def has_crossed_intersection(self) -> bool:
         center = ui_constants.CENTER
-        margin = 50
+        margin = 60
 
         if self.direction == 'N' and self.y >= center + margin:
             return True
-        if self.direction == 'S' and self.y <= center - margin:
+        elif self.direction == 'S' and self.y <= center - margin:
             return True
-        if self.direction == 'E' and self.x <= center - margin:
+        elif self.direction == 'W' and self.x >= center + margin:
             return True
-        if self.direction == 'W' and self.x <= center + margin:
+        elif self.direction == 'E' and self.x <= center - margin:
             return True
 
         return False

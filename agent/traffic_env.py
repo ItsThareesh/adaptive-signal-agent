@@ -52,10 +52,14 @@ class TrafficEnv:
         # CORE LOGIC
         if not self.paused:
             for tl in self.traffic_lights:
-                tl.update_tl()
+                if tl.target_state == 'GREEN' and self.controller.is_intersection_clear():
+                    # logger.info(f'INTERSECTION is now clear')
+                    tl.update_tl()
+                elif tl.target_state in ['YELLOW', 'RED']:
+                    tl.update_tl()
 
             self.spawner.maybe_spawn_car(self.controller.lane_queues)
-            self.last_reward = self.controller.update_cars(self.screen, train)
+            self.last_reward = self.controller.update_cars_positions(self.screen, train)
 
             # Update the display
             if not train:
@@ -67,17 +71,29 @@ class TrafficEnv:
         w_e_bucket = self.controller.lane_queues['W'].get_total_cars() + self.controller.lane_queues['E'].get_total_cars()
 
         def bucket(x):
-            if x <= 2:
+            if x == 0:
                 return 0
-            elif x <= 5:
+            elif x <= 2:
                 return 1
+            elif x <= 5:
+                return 3
             else:
-                return 2
+                return 5
 
         return bucket(n_s_bucket), bucket(w_e_bucket)
 
-    def compute_reward(self):
-        return self.last_reward
+    def compute_reward(self, action):
+        # Get total cars in both directions
+        if action == 0:
+            penalty = self.controller.lane_queues['E'].get_total_cars() + \
+                       self.controller.lane_queues['W'].get_total_cars()
+        else:
+            penalty = self.controller.lane_queues['N'].get_total_cars() + \
+                       self.controller.lane_queues['S'].get_total_cars()
+
+        # Weighted reward
+        reward = self.last_reward * 2 - (0.5 * penalty)
+        return reward
 
     def set_light_state(self, action: int):
         green_dirs = ['N', 'S'] if action == 0 else ['E', 'W']

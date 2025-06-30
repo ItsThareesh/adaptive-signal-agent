@@ -17,7 +17,7 @@ class CarsController:
         for dirctn in ['N', 'S', 'W', 'E']:
             self.lane_queues[dirctn] = LaneQueue()
 
-    def update_cars(self, screen, train=False) -> int:
+    def update_cars_positions(self, screen, train=False) -> int:
         self._remove_out_of_bounds()
         cars_passed = 0
 
@@ -50,6 +50,16 @@ class CarsController:
                 car.draw(screen)
 
         return cars_passed
+
+    def is_intersection_clear(self):
+        center = ui_constants.CENTER
+        margin = 75
+
+        for car in self.cars:
+            if center - margin < car.x < center + margin and center - margin < car.y < center + margin:
+                return False
+
+        return True
 
     @staticmethod
     def _too_close_to_other(car: Car, front_car: Car, min_gap=35):
@@ -99,7 +109,7 @@ class CarsController:
         """
         stop_margin = 25
 
-        if tl.state == 'RED':
+        if tl.state in ['RED', 'YELLOW']:
             if tl.direction == 'N':
                 stop_line_y = ui_constants.CENTER - ui_constants.LANE_WIDTH // 2
 

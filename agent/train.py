@@ -3,39 +3,43 @@ from agent.q_learning_agent import QLearningAgent
 from agent.traffic_env import TrafficEnv
 
 
-def train(q_agent: QLearningAgent, environment: TrafficEnv, n_episodes: int=500, steps_per_episode: int=300):
-    DECISION_TIMER = 60
+def train(q_agent: QLearningAgent, environment: TrafficEnv, n_episodes: int=500, steps_per_episode: int=600):
+    decision_timer = 90
 
     for episode in range(n_episodes):
         total_reward = 0
-        environment.reset()
+
+        # Initial decision
+        learn_state = environment.get_state()
+        learn_action = q_agent.choose_action(learn_state)
+        environment.set_light_state(learn_action)
+
+        # * Previously it was updating every 3 sec in a 20 sec game, which isn't ideal. So change it every game instead
+        q_agent.epsilon = max(q_agent.epsilon * q_agent.epsilon_decay, q_agent.min_epsilon)
 
         for step in range(steps_per_episode):
-            # Take action and learn only every DECISION_TIMER steps
-            if step % DECISION_TIMER == 0:
-                state = environment.get_state()
-                action = q_agent.choose_action(state)
-                environment.set_light_state(action)
-
-                # Store for learning after environment updates
-                learn_state = state
-                learn_action = action
-
-            # Update environment on *every* step
+            # Update Enviroment every Frame
             environment.update()
 
-            # Reward and learn logic still runs every DECISION_TIMER
-            if step % DECISION_TIMER == 0:
-                next_state = environment.get_state()
-                reward = environment.compute_reward()
+            # For every 90th step or 3 sec in a 30 FPS game
+            if step % decision_timer == 0 and step > 0:
+                # Learn from the previous decision
+                reward = environment.compute_reward(learn_action)
                 total_reward += reward
+                # Get next state
+                next_state = environment.get_state()
 
                 q_agent.learn(learn_state, learn_action, reward, next_state)
 
-        print(f"Episode {episode+1}/{n_episodes} | Total Reward: {total_reward:.2f} | Epsilon: {q_agent.epsilon:.3f}")
+                learn_state = next_state # Update Learn State for the next decision
+                learn_action = q_agent.choose_action(learn_state) # Update Learn action for the next decision
+                environment.set_light_state(learn_action) # Set lights for the next decision
 
-    # Save after training
-    q_agent.save("q_table.pkl")
+        environment.reset()
+
+        print(f"Episode {episode + 1}/{n_episodes} | Total Reward: {total_reward:.2f} | Epsilon: {q_agent.epsilon:.3f}")
+
+        q_agent.save("q_table.pkl")
 
 
 if __name__ == '__main__':

@@ -1,5 +1,4 @@
 import time
-import random
 from . import game_constants
 from utils.logger import logger
 
@@ -14,7 +13,7 @@ class TrafficLight:
         self.__yellow_duration = game_constants.YELLOW_DURATION
         self.last_switch_time = time.time()
 
-        logger.info(f'Traffic Light at {self.direction} is initialized to {self.state}')
+        logger.info(f"[{self.direction}] INITIALIZED TO {self.state}")
 
     def update_tl(self):
         current_time = time.time()
