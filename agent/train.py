@@ -3,7 +3,7 @@ from agent.q_learning_agent import QLearningAgent
 from agent.traffic_env import TrafficEnv
 
 
-def train(q_agent: QLearningAgent, environment: TrafficEnv, n_episodes: int=500, steps_per_episode: int=600):
+def train(q_agent: QLearningAgent, environment: TrafficEnv, n_episodes: int=500, steps_per_episode: int=600, current_episode: int=0):
     decision_timer = 90
 
     for episode in range(n_episodes):
@@ -19,7 +19,7 @@ def train(q_agent: QLearningAgent, environment: TrafficEnv, n_episodes: int=500,
 
         for step in range(steps_per_episode):
             # Update Enviroment every Frame
-            environment.update()
+            environment.update(train=False)
 
             # For every 90th step or 3 sec in a 30 FPS game
             if step % decision_timer == 0 and step > 0:
@@ -39,11 +39,11 @@ def train(q_agent: QLearningAgent, environment: TrafficEnv, n_episodes: int=500,
 
         print(f"Episode {episode + 1}/{n_episodes} | Total Reward: {total_reward:.2f} | Epsilon: {q_agent.epsilon:.3f}")
 
-        q_agent.save("q_table.pkl")
+        q_agent.save(episode)
 
 
 if __name__ == '__main__':
     agent = QLearningAgent()
-    # agent.load()
+    epoch = agent.load()
     env = TrafficEnv()
-    train(agent, env, n_episodes=500)
+    train(agent, env, n_episodes=500, current_episode=epoch)

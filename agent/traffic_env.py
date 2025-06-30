@@ -22,24 +22,15 @@ class TrafficEnv:
         self.controller = CarsController(self.spawner.cars, self.traffic_lights)
 
         # Internal State
-        self.running = True
-        self.paused = False
         self.last_reward = 0
+        self.clear_frames = 0
+        self.required_clear_frames = 1.5 * ui_constants.FPS  # wait 1.5 sec before allowing green
+        self.pending_green_dirs = []
 
     def update(self, train: bool=False):
         # ALL UI ELEMENTS
         if not train:
             self.screen.fill(ui_constants.UI_COLORS['BLACK'])
-
-            # Commmand to pause the game
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    self.running = False
-
-                if event.type == pygame.KEYDOWN:
-                    if event.key == pygame.K_SPACE:
-                        self.paused = not self.paused
-                        logger.info("Paused" if self.paused else "Resumed")
 
             # Render UI Elements
             draw_edge_green_boxes(self.screen)
@@ -50,21 +41,32 @@ class TrafficEnv:
             show_fps(self.screen, self.clock)
 
         # CORE LOGIC
-        if not self.paused:
+        if self.controller.is_intersection_clear():
+            self.clear_frames += 1
+        else:
+            self.clear_frames = 0
+
+        if self.clear_frames >= self.required_clear_frames and self.pending_green_dirs:
+            logger.info("Intersection Cleared... Updating RED lights to GREEN")
+
+            # Set actual green once intersection is clear
             for tl in self.traffic_lights:
-                if tl.target_state == 'GREEN' and self.controller.is_intersection_clear():
-                    # logger.info(f'INTERSECTION is now clear')
-                    tl.update_tl()
-                elif tl.target_state in ['YELLOW', 'RED']:
-                    tl.update_tl()
+                if tl.direction in self.pending_green_dirs:
+                    tl.target_state = 'GREEN'
 
-            self.spawner.maybe_spawn_car(self.controller.lane_queues)
-            self.last_reward = self.controller.update_cars_positions(self.screen, train)
+            # Reset after triggering
+            self.pending_green_dirs = []
+            self.clear_frames = 0
 
-            # Update the display
-            if not train:
-                pygame.display.flip()
-                self.clock.tick(ui_constants.FPS)
+        for tl in self.traffic_lights:
+            tl.update_tl()
+
+        self.spawner.maybe_spawn_car(self.controller.lane_queues)
+        self.last_reward = self.controller.update_cars_positions(self.screen, train)
+
+        if not train:
+            pygame.display.flip()
+            self.clock.tick(ui_constants.FPS)
 
     def get_state(self) -> tuple:
         n_s_bucket = self.controller.lane_queues['N'].get_total_cars() + self.controller.lane_queues['S'].get_total_cars()
@@ -92,17 +94,31 @@ class TrafficEnv:
                        self.controller.lane_queues['S'].get_total_cars()
 
         # Weighted reward
-        reward = self.last_reward * 2 - (0.5 * penalty)
+        reward = 2 * self.last_reward - (0.5 * penalty)
         return reward
 
     def set_light_state(self, action: int):
         green_dirs = ['N', 'S'] if action == 0 else ['E', 'W']
+        self.pending_green_dirs = green_dirs
+
+        logger.info(f"Setting GREEN for: {green_dirs}")
 
         for tl in self.traffic_lights:
-            tl.target_state = 'GREEN' if tl.direction in green_dirs else 'RED'
+            if tl.direction not in green_dirs:
+                tl.target_state = 'RED'
+
+    def _reset_simulation_state(self):
+        self.traffic_lights = [TrafficLight(d) for d in ['N', 'S', 'W', 'E']]
+        self.spawner = CarsSpawner(max_cars=15)
+        self.controller = CarsController(self.spawner.cars, self.traffic_lights)
+
+        self.last_reward = 0
+        self.clear_frames = 0
+        self.required_clear_frames = 45
+        self.pending_green_dirs = []
 
     def reset(self):
-        self.__init__()
+        self._reset_simulation_state()
 
     @staticmethod
     def quit():
