@@ -5,17 +5,18 @@ import os
 import pickle
 from utils.logger import logger
 
+
 class QLearningAgent:
     def __init__(self, action_space=2, alpha=0.1, gamma=0.9, epsilon=1.0, min_epsilon=0.1, epsilon_decay=0.95):
         self.action_space = action_space
         self.q_table = defaultdict(lambda: np.zeros(action_space))
 
         # Hyperparameters
-        self.alpha = alpha # Learning Rate
-        self.gamma = gamma # Discount Factor
-        self.epsilon = epsilon # Exploration Rate
-        self.min_epsilon = min_epsilon # Min Exploration Rate upon decaying
-        self.epsilon_decay = epsilon_decay # Exploration Decay Rate
+        self.alpha = alpha  # Learning Rate
+        self.gamma = gamma  # Discount Factor
+        self.epsilon = epsilon  # Exploration Rate
+        self.min_epsilon = min_epsilon  # Min Exploration Rate upon decaying
+        self.epsilon_decay = epsilon_decay  # Exploration Decay Rate
 
     def choose_action(self, state):
         """
@@ -46,7 +47,7 @@ class QLearningAgent:
     def load(self, path='q_table.pkl'):
         if not os.path.exists(path):
             logger.error(f"[!] Q-table file '{path}' not found.")
-            return
+            return 0
 
         with open(path, 'rb') as f:
             data = pickle.load(f)

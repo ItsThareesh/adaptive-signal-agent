@@ -1,12 +1,11 @@
-import time
 from agent.q_learning_agent import QLearningAgent
 from agent.traffic_env import TrafficEnv
 
 
-def train(q_agent: QLearningAgent, environment: TrafficEnv, n_episodes: int=500, steps_per_episode: int=600, current_episode: int=0):
+def train(q_agent: QLearningAgent, environment: TrafficEnv, n_episodes: int = 500, steps_per_episode: int = 600, last_episode: int = 0):
     decision_timer = 90
 
-    for episode in range(n_episodes):
+    for episode in range(n_episodes-last_episode):
         total_reward = 0
 
         # Initial decision
@@ -31,13 +30,13 @@ def train(q_agent: QLearningAgent, environment: TrafficEnv, n_episodes: int=500,
 
                 q_agent.learn(learn_state, learn_action, reward, next_state)
 
-                learn_state = next_state # Update Learn State for the next decision
-                learn_action = q_agent.choose_action(learn_state) # Update Learn action for the next decision
-                environment.set_light_state(learn_action) # Set lights for the next decision
+                learn_state = next_state  # Update Learn State for the next decision
+                learn_action = q_agent.choose_action(learn_state)  # Update Learn action for the next decision
+                environment.set_light_state(learn_action)  # Set lights for the next decision
 
         environment.reset()
 
-        print(f"Episode {episode + 1}/{n_episodes} | Total Reward: {total_reward:.2f} | Epsilon: {q_agent.epsilon:.3f}")
+        print(f"Episode {last_episode + episode + 1}/{n_episodes} | Total Reward: {total_reward:.2f} | Epsilon: {q_agent.epsilon:.3f}")
 
         q_agent.save(episode)
 
@@ -45,5 +44,6 @@ def train(q_agent: QLearningAgent, environment: TrafficEnv, n_episodes: int=500,
 if __name__ == '__main__':
     agent = QLearningAgent()
     epoch = agent.load()
+
     env = TrafficEnv()
-    train(agent, env, n_episodes=500, current_episode=epoch)
+    train(agent, env, n_episodes=500, last_episode=epoch)
