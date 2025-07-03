@@ -28,14 +28,18 @@ class CarsController:
                 if tl.direction != car.direction:
                     continue
 
-                # print(f"Car {car.ID} before TL: {car.is_before_tl(tl)}")
-                # print(f"Car {car.ID} will cross stop line: {car.will_cross_stop_line(tl)}")
-                # print(f"Car {car.ID} is near TL: {car.is_near_tl(tl)}")
-
-                if car.is_before_tl(tl):
-                    if car.will_cross_stop_line(tl) and car.is_near_tl(tl):
-                        should_stop = True
+                if tl.state in ['RED', 'YELLOW']:
+                    if not car.is_before_tl(tl):
                         break
+
+                    if car.is_near_tl(tl):
+                        # Make decision ONCE when near TL
+                        if car.will_cross is None:
+                            car.will_cross = car.safely_cross_intersection(tl)
+
+                        if not car.will_cross:
+                            should_stop = True
+                            break
                     else:
                         front_car = self.lane_queues[car.direction].get_front_car(car)
 

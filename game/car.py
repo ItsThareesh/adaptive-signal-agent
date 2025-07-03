@@ -15,6 +15,8 @@ class Car:
         # Assume left side driving... Then the right most lane is 0th index and 1st index is left to it
         self.lane = random.choice([0, 1])
 
+        self.will_cross = None
+
         self._decide_direction()
 
     def _decide_direction(self):
@@ -107,9 +109,6 @@ class Car:
         """
             Checks if the given car's position is before the traffic light in appropriate direction (when it's RED)
         """
-        if tl.state not in ['RED', 'YELLOW']:
-            return False
-
         if tl.direction == 'N':
             stop_line_y = ui_constants.CENTER - ui_constants.LANE_WIDTH // 2
 
@@ -136,53 +135,40 @@ class Car:
 
         return False
 
-    def will_cross_stop_line(self, tl: TrafficLight):
+    def safely_cross_intersection(self, tl: TrafficLight) -> bool:
         """
             Apply Simple Kinematics Equation [final_position = initial_position + velocity * time] to figure out if the
             car crosses the traffic light within the specified time limit.
         """
-        stop_margin = 25
-        buffer_margin = 10
+        if tl.state in ['RED', 'YELLOW']:
+            fps = ui_constants.FPS
+            time_left = tl.get_time_left()
 
-        if tl.state not in ['RED', 'YELLOW']:
-            return False
+            if tl.direction == 'N':
+                cross_line_y = ui_constants.CENTER + ui_constants.LANE_WIDTH // 2
+                predicted_pos = self.y + self.vy * time_left * fps
 
-        fps = ui_constants.FPS
-        time_left = tl.get_time_left()
+                return predicted_pos > cross_line_y + 25
 
-        if tl.direction == 'N':
-            stop_line_y = ui_constants.CENTER - ui_constants.LANE_WIDTH // 2
-            predicted_pos = self.y + self.vy * time_left * fps
+            elif tl.direction == 'S':
+                cross_line_y = ui_constants.CENTER - ui_constants.LANE_WIDTH // 2
+                predicted_pos = self.y + self.vy * time_left * fps
 
-            if self.y <= stop_line_y - stop_margin and predicted_pos > stop_line_y - buffer_margin:
-                # print(f"Car: {self.ID} expected to cross traffic light. So stopping early.")
-                return True
+                return predicted_pos < cross_line_y - 25
 
-        elif tl.direction == 'S':
-            stop_line_y = ui_constants.CENTER + ui_constants.LANE_WIDTH // 2
-            predicted_pos = self.y + self.vy * time_left * fps
+            elif tl.direction == 'W':
+                cross_line_x = ui_constants.CENTER + ui_constants.LANE_WIDTH // 2
+                predicted_pos = self.x + self.vx * time_left * fps
 
-            if self.y >= stop_line_y + stop_margin and stop_line_y + buffer_margin > predicted_pos:
-                # print(f"Car: {self.ID} expected to cross traffic light. So stopping early.")
-                return True
+                return predicted_pos > cross_line_x + 25
 
-        elif tl.direction == 'W':
-            stop_line_x = ui_constants.CENTER - ui_constants.LANE_WIDTH // 2
-            predicted_pos = self.x + self.vx * time_left * fps
+            else:
+                cross_line_x = ui_constants.CENTER - ui_constants.LANE_WIDTH // 2
+                predicted_pos = self.x + self.vx * time_left * fps
 
-            if self.x <= stop_line_x - stop_margin and predicted_pos > stop_line_x - buffer_margin:
-                # print(f"Car: {self.ID} expected to cross traffic light. So stopping early.")
-                return True
+                return predicted_pos < cross_line_x - 25
 
-        else:
-            stop_line_x = ui_constants.CENTER + ui_constants.LANE_WIDTH // 2
-            predicted_pos = self.x + self.vx * time_left * fps
-
-            if self.x >= stop_line_x + stop_margin and stop_line_x + buffer_margin > predicted_pos:
-                # print(f"Car: {self.ID} expected to cross traffic light. So stopping early.")
-                return True
-
-        return False
+        return True
 
     def is_near_tl(self, tl: TrafficLight, stop_margin: int = 25) -> bool:
         """
