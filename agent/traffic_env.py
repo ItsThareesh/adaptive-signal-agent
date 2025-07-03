@@ -7,6 +7,7 @@ from ui import ui_constants
 from ui.draw import draw_edge_green_boxes, draw_lanes, draw_stop_lines, draw_traffic_lights, show_fps, show_cars
 from utils.logger import logger
 
+
 class TrafficEnv:
     def __init__(self):
         pygame.init()
@@ -23,11 +24,9 @@ class TrafficEnv:
 
         # Internal State
         self.last_reward = 0
-        self.clear_frames = 0
-        self.required_clear_frames = 1.5 * ui_constants.FPS  # wait 1.5 sec before allowing green
         self.pending_green_dirs = []
 
-    def update(self, train: bool=False):
+    def update(self, train: bool = False):
         # ALL UI ELEMENTS
         if not train:
             self.screen.fill(ui_constants.UI_COLORS['BLACK'])
@@ -41,28 +40,21 @@ class TrafficEnv:
             show_fps(self.screen, self.clock)
 
         # CORE LOGIC
-        if self.controller.is_intersection_clear():
-            self.clear_frames += 1
-        else:
-            self.clear_frames = 0
+        if self.pending_green_dirs:
+            logger.info("Updating RED lights to GREEN")
 
-        if self.clear_frames >= self.required_clear_frames and self.pending_green_dirs:
-            logger.info("Intersection Cleared... Updating RED lights to GREEN")
-
-            # Set actual green once intersection is clear
             for tl in self.traffic_lights:
                 if tl.direction in self.pending_green_dirs:
                     tl.target_state = 'GREEN'
 
             # Reset after triggering
             self.pending_green_dirs = []
-            self.clear_frames = 0
 
         for tl in self.traffic_lights:
             tl.update_tl()
 
-        self.spawner.maybe_spawn_car(self.controller.lane_queues)
         self.last_reward = self.controller.update_cars_positions(self.screen, train)
+        self.spawner.maybe_spawn_car(self.controller.lane_queues)
 
         if not train:
             pygame.display.flip()
@@ -88,10 +80,10 @@ class TrafficEnv:
         # Get total cars in both directions
         if action == 0:
             penalty = self.controller.lane_queues['E'].get_total_cars() + \
-                       self.controller.lane_queues['W'].get_total_cars()
+                self.controller.lane_queues['W'].get_total_cars()
         else:
             penalty = self.controller.lane_queues['N'].get_total_cars() + \
-                       self.controller.lane_queues['S'].get_total_cars()
+                self.controller.lane_queues['S'].get_total_cars()
 
         # Weighted reward
         reward = 2 * self.last_reward - (0.5 * penalty)
@@ -107,7 +99,7 @@ class TrafficEnv:
             if tl.direction not in green_dirs:
                 tl.target_state = 'RED'
 
-    def _reset_simulation_state(self):
+    def _reset_simulation(self):
         self.traffic_lights = [TrafficLight(d) for d in ['N', 'S', 'W', 'E']]
         self.spawner = CarsSpawner(max_cars=15)
         self.controller = CarsController(self.spawner.cars, self.traffic_lights)
@@ -118,10 +110,9 @@ class TrafficEnv:
         self.pending_green_dirs = []
 
     def reset(self):
-        self._reset_simulation_state()
+        self._reset_simulation()
 
     @staticmethod
     def quit():
         pygame.quit()
         sys.exit()
-

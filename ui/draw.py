@@ -94,7 +94,6 @@ def draw_stop_lines(screen):
 
 def draw_traffic_lights(screen, traffic_lights: list[TrafficLight]):
     radius = 10
-    padding = 0
     x, y = 0, 0
 
     center = ui_constants.CENTER
@@ -111,18 +110,18 @@ def draw_traffic_lights(screen, traffic_lights: list[TrafficLight]):
 
         if tl.direction == 'N':
             x = center
-            y = center - half_lane_dst - padding
+            y = center - half_lane_dst
 
         elif tl.direction == 'S':
             x = center
-            y = center + half_lane_dst + padding
+            y = center + half_lane_dst
 
         elif tl.direction == 'E':
-            x = center + half_lane_dst + padding
+            x = center + half_lane_dst
             y = center
 
         elif tl.direction == 'W':
-            x = center - half_lane_dst - padding
+            x = center - half_lane_dst
             y = center
 
         pygame.draw.circle(screen, color, (x, y), radius)

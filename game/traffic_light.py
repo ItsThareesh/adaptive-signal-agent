@@ -32,3 +32,16 @@ class TrafficLight:
         elif self.state == 'YELLOW' and elapsed_time > self.__yellow_duration:
             self.state = 'RED'
             self.last_switch_time = current_time
+
+    def get_time_left(self) -> float:
+        current_time = time.time()
+        elapsed = current_time - self.last_switch_time
+
+        if self.state == 'RED':
+            return max(0.0, self.__red_duration - elapsed)
+        elif self.state == 'GREEN':
+            return max(0.0, self.__green_duration - elapsed)
+        elif self.state == 'YELLOW':
+            return max(0.0, self.__yellow_duration - elapsed)
+
+        return 0  # fallback

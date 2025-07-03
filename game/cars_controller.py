@@ -28,8 +28,12 @@ class CarsController:
                 if tl.direction != car.direction:
                     continue
 
-                if self._is_before_tl(tl, car):
-                    if self._is_near_tl(tl, car):
+                # print(f"Car {car.ID} before TL: {car.is_before_tl(tl)}")
+                # print(f"Car {car.ID} will cross stop line: {car.will_cross_stop_line(tl)}")
+                # print(f"Car {car.ID} is near TL: {car.is_near_tl(tl)}")
+
+                if car.is_before_tl(tl):
+                    if car.will_cross_stop_line(tl) and car.is_near_tl(tl):
                         should_stop = True
                         break
                     else:
@@ -68,77 +72,8 @@ class CarsController:
         else:
             return abs(car.x - front_car.x) < min_gap
 
-    @staticmethod
-    def _is_near_tl(tl: TrafficLight, car: Car) -> bool:
-        """
-            Checks if the car crosses a threshold distance for it to stop, so that the cars stop at exactly the same
-            line near the traffic light.
-        """
-        stop_margin = 25
-
-        if tl.direction == 'N':
-            stop_line_y = ui_constants.CENTER - ui_constants.LANE_WIDTH // 2
-
-            if car.y >= stop_line_y - stop_margin:
-                return True
-
-        elif tl.direction == 'S':
-            stop_line_y = ui_constants.CENTER + ui_constants.LANE_WIDTH // 2
-
-            if car.y <= stop_line_y + stop_margin:
-                return True
-
-        elif tl.direction == 'W':
-            stop_line_x = ui_constants.CENTER - ui_constants.LANE_WIDTH // 2
-
-            if car.x >= stop_line_x - stop_margin:
-                return True
-
-        elif tl.direction == 'E':
-            stop_line_x = ui_constants.CENTER + ui_constants.LANE_WIDTH // 2
-
-            if car.x <= stop_line_x + stop_margin:
-                return True
-
-        return False
-
-    @staticmethod
-    def _is_before_tl(tl, car: Car) -> bool:
-        """
-            Checks if the given car's position is before the traffic light in appropriate direction (when it's RED)
-        """
-        stop_margin = 25
-
-        if tl.state in ['RED', 'YELLOW']:
-            if tl.direction == 'N':
-                stop_line_y = ui_constants.CENTER - ui_constants.LANE_WIDTH // 2
-
-                if car.y <= stop_line_y - stop_margin:
-                    return True
-
-            elif tl.direction == 'S':
-                stop_line_y = ui_constants.CENTER + ui_constants.LANE_WIDTH // 2
-
-                if car.y >= stop_line_y + stop_margin:
-                    return True
-
-            elif tl.direction == 'W':
-                stop_line_x = ui_constants.CENTER - ui_constants.LANE_WIDTH // 2
-
-                if car.x <= stop_line_x - stop_margin:
-                    return True
-
-            elif tl.direction == 'E':
-                stop_line_x = ui_constants.CENTER + ui_constants.LANE_WIDTH // 2
-
-                if car.x >= stop_line_x + stop_margin:
-                    return True
-
-        return False
-
     def _remove_out_of_bounds(self):
-        # Creating a shallow copy of self.cars array just in case to prevent RunTime errors
-        for car in self.cars[:]:
+        for car in self.cars[:]:  # Iterate over a copy to avoid skipping elements
             if car.is_out_of_bounds():
                 logger.info(f"Removed Car {car.ID}")
                 lane_queue = self.lane_queues[car.direction]
