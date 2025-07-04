@@ -1,4 +1,3 @@
-from ui.ui_constants import CENTER, LANE_WIDTH
 from .car import Car
 from .traffic_light import TrafficLight
 from .lane_queue import LaneQueue

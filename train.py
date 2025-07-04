@@ -39,7 +39,7 @@ def train(params: TrainingParameters, **kwargs):
 
         for step in range(params.frames_per_epoch):
             # Update Enviroment every Frame
-            params.environment.update(train=False)
+            params.environment.update()
 
             if step % decision_timer == 0 and step > 0:
                 # Learn from the previous decision

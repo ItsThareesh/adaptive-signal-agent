@@ -5,7 +5,14 @@ from game.cars_spawner import CarsSpawner
 from game.traffic_light import TrafficLight
 from game.scheduler import TrafficLightScheduler
 from ui import ui_constants
-from ui.draw import draw_edge_green_boxes, draw_lanes, draw_stop_lines, draw_traffic_lights, show_fps, show_cars
+from ui.draw import (
+    draw_edge_green_boxes,
+    draw_lanes,
+    draw_stop_lines,
+    draw_traffic_lights,
+    show_fps,
+    show_cars,
+)
 from utils.logger import logger
 
 

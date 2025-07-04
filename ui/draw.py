@@ -52,7 +52,6 @@ def draw_lanes(screen):
         south_lane_line = pygame.Rect(left, height - line_length, get_divider_length(i), line_length)
         pygame.draw.rect(screen, ui_constants.UI_COLORS['GREY'], south_lane_line)
 
-
     # West Lanes
     for i in range(1, 4):
         top = grass_bos_size + i * lane_width_offset - line_width // 2
@@ -134,9 +133,19 @@ def show_fps(screen, clock):
     fps_text = font.render(f'FPS: {fps}', True, (0, 0, 0))
     screen.blit(fps_text, (10, 10))
 
-def show_cars(screen, total_cars):
+
+def show_cars(screen, total_cars: int):
     font = pygame.font.SysFont("Arial", 16, True)
 
-    fps = total_cars
-    fps_text = font.render(f'Total Cars: {fps}', True, (0, 0, 0))
-    screen.blit(fps_text, (screen.get_width() - 110, 10))
+    cars_text = font.render(f'Total Cars: {total_cars}', True, (0, 0, 0))
+    screen.blit(cars_text, (screen.get_width() - 110, 10))
+
+
+def show_epoch(screen, clock, epoch: int):
+    font = pygame.font.SysFont("Arial", 16, True)
+
+    epoch_text = font.render(f'Epoch: {epoch}', True, (0, 0, 0))
+    text_rect = epoch_text.get_rect()
+    text_rect.bottomright = (screen.get_width() - 10, screen.get_height() - 10)
+
+    screen.blit(epoch_text, text_rect)
