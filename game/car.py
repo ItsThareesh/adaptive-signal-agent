@@ -135,40 +135,37 @@ class Car:
 
         return False
 
-    def safely_cross_intersection(self, tl: TrafficLight) -> bool:
-        """
-            Apply Simple Kinematics Equation [final_position = initial_position + velocity * time] to figure out if the
-            car crosses the traffic light within the specified time limit.
-        """
-        if tl.state in ['RED', 'YELLOW']:
-            fps = ui_constants.FPS
-            time_left = tl.get_time_left()
+    # def safely_cross_intersection(self, tl: TrafficLight) -> bool:
+    #     """
+    #         Apply Simple Kinematics Equation [final_position = initial_position + velocity * time] to figure out if the
+    #         car crosses the traffic light within the specified time limit.
+    #     """
+    #     fps = ui_constants.FPS
+    #     time_left = tl.get_time_left()
 
-            if tl.direction == 'N':
-                cross_line_y = ui_constants.CENTER + ui_constants.LANE_WIDTH // 2
-                predicted_pos = self.y + self.vy * time_left * fps
+    #     if tl.direction == 'N':
+    #         cross_line_y = ui_constants.CENTER + ui_constants.LANE_WIDTH // 2
+    #         predicted_pos = self.y + self.vy * time_left * fps
 
-                return predicted_pos > cross_line_y + 25
+    #         return predicted_pos > cross_line_y + 25
 
-            elif tl.direction == 'S':
-                cross_line_y = ui_constants.CENTER - ui_constants.LANE_WIDTH // 2
-                predicted_pos = self.y + self.vy * time_left * fps
+    #     elif tl.direction == 'S':
+    #         cross_line_y = ui_constants.CENTER - ui_constants.LANE_WIDTH // 2
+    #         predicted_pos = self.y + self.vy * time_left * fps
 
-                return predicted_pos < cross_line_y - 25
+    #         return predicted_pos < cross_line_y - 25
 
-            elif tl.direction == 'W':
-                cross_line_x = ui_constants.CENTER + ui_constants.LANE_WIDTH // 2
-                predicted_pos = self.x + self.vx * time_left * fps
+    #     elif tl.direction == 'W':
+    #         cross_line_x = ui_constants.CENTER + ui_constants.LANE_WIDTH // 2
+    #         predicted_pos = self.x + self.vx * time_left * fps
 
-                return predicted_pos > cross_line_x + 25
+    #         return predicted_pos > cross_line_x + 25
 
-            else:
-                cross_line_x = ui_constants.CENTER - ui_constants.LANE_WIDTH // 2
-                predicted_pos = self.x + self.vx * time_left * fps
+    #     else:
+    #         cross_line_x = ui_constants.CENTER - ui_constants.LANE_WIDTH // 2
+    #         predicted_pos = self.x + self.vx * time_left * fps
 
-                return predicted_pos < cross_line_x - 25
-
-        return True
+    #         return predicted_pos < cross_line_x - 25
 
     def is_near_tl(self, tl: TrafficLight, stop_margin: int = 25) -> bool:
         """

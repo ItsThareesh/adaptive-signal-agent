@@ -4,4 +4,3 @@ __pycache__
 *.ipynb
 q-learning.py
 *.pkl
-game/tl_scheduler.py

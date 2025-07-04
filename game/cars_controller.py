@@ -1,4 +1,4 @@
-from ui import ui_constants
+from ui.ui_constants import CENTER, LANE_WIDTH
 from .car import Car
 from .traffic_light import TrafficLight
 from .lane_queue import LaneQueue
@@ -6,10 +6,14 @@ from utils.logger import logger
 
 
 class CarsController:
-    def __init__(self, cars: list[Car], traffic_lights: list[TrafficLight]):
+    def __init__(self, cars: list[Car], traffic_lights: list[TrafficLight], **kwargs):
         self.cars = cars
         self.traffic_lights = traffic_lights
         self.lane_queues = {}
+        self.verbose = kwargs.get("verbose", False)
+
+        if self.verbose:
+            logger.info("[CarsController] Verbose mode ON")
 
         self._initialize_lane_queue()
 
@@ -25,21 +29,21 @@ class CarsController:
             should_stop = False
 
             for tl in self.traffic_lights:
+                # If Car's Direction and Traffic Light Direction isn't the same, then go to next iteration
                 if tl.direction != car.direction:
                     continue
 
-                if tl.state in ['RED', 'YELLOW']:
-                    if not car.is_before_tl(tl):
-                        break
+                # if not car.is_before_tl(tl):
+                #     break
 
+                # if tl.state == 'GREEN':
+                #     if car.is_near_tl(tl):
+                #         if car.will_cross is None and car.safely_cross_intersection(tl):
+
+                if tl.state in ['RED', 'YELLOW'] and car.is_before_tl(tl):
                     if car.is_near_tl(tl):
-                        # Make decision ONCE when near TL
-                        if car.will_cross is None:
-                            car.will_cross = car.safely_cross_intersection(tl)
-
-                        if not car.will_cross:
-                            should_stop = True
-                            break
+                        should_stop = True
+                        break
                     else:
                         front_car = self.lane_queues[car.direction].get_front_car(car)
 
@@ -59,16 +63,6 @@ class CarsController:
 
         return cars_passed
 
-    def is_intersection_clear(self):
-        center = ui_constants.CENTER
-        margin = 75
-
-        for car in self.cars:
-            if center - margin < car.x < center + margin and center - margin < car.y < center + margin:
-                return False
-
-        return True
-
     @staticmethod
     def _too_close_to_other(car: Car, front_car: Car, min_gap=35):
         if car.direction in ['N', 'S']:
@@ -79,11 +73,12 @@ class CarsController:
     def _remove_out_of_bounds(self):
         for car in self.cars[:]:  # Iterate over a copy to avoid skipping elements
             if car.is_out_of_bounds():
-                logger.info(f"Removed Car {car.ID}")
-                lane_queue = self.lane_queues[car.direction]
+                if self.verbose:
+                    logger.info(f"Removed Car {car.ID}")
 
-                # Since I'm running this method on every frame, it's safe to
-                # think that the first car in any lane left the window frame
+                # Since I'm running this method on every frame, it's safe to think
+                # that the first car in any lane left the window frame
+                lane_queue = self.lane_queues[car.direction]
                 if lane_queue.peek(car.lane) == car:
                     lane_queue.dequeue(car.lane)
 

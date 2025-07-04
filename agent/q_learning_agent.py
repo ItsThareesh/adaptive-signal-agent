@@ -24,6 +24,7 @@ class QLearningAgent:
         """
         if random.random() < self.epsilon:
             return random.randint(0, self.action_space - 1)
+
         return np.argmax(self.q_table[state])
 
     def learn(self, state, action, reward, next_state):
@@ -32,7 +33,7 @@ class QLearningAgent:
         self.q_table[state][action] *= self.alpha
         self.q_table[state][action] += self.alpha * (reward + self.gamma * max_next_q)
 
-    def save(self, epochs, path='q_table.pkl'):
+    def save(self, epochs: int, path='q_table.pkl'):
         with open(path, 'wb') as f:
             pickle.dump(
                 {

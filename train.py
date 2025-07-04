@@ -1,49 +1,74 @@
 from agent.q_learning_agent import QLearningAgent
 from agent.traffic_env import TrafficEnv
+from game.game_constants import GREEN_DURATION, YELLOW_DURATION
+from ui.ui_constants import FPS
+from utils.logger import logger
 
 
-def train(q_agent: QLearningAgent, environment: TrafficEnv, n_episodes: int = 500, steps_per_episode: int = 600, last_episode: int = 0):
-    decision_timer = 90
+class TrainingParameters:
+    def __init__(self):
+        self.q_agent = QLearningAgent()
+        self.environment = TrafficEnv()
+        self.total_epochs = 500
+        self.frames_per_epoch = 600
+        self.last_saved_epoch = self.q_agent.load()
 
-    for episode in range(n_episodes-last_episode):
+
+def train(params: TrainingParameters, **kwargs):
+    last_epoch = params.last_saved_epoch
+    verbose = kwargs.get("verbose", False)
+
+    decision_timer = int((GREEN_DURATION + YELLOW_DURATION) * FPS)
+
+    for epoch in range(params.total_epochs-params.last_saved_epoch):
         total_reward = 0
 
         # Initial decision
-        learn_state = environment.get_state()
-        learn_action = q_agent.choose_action(learn_state)
-        environment.set_light_state(learn_action)
+        init_state = params.environment.get_state()
+        init_action = params.q_agent.choose_action(init_state)
+        params.environment.set_light_state(init_action)
 
-        # * Previously it was updating every 3 sec in a 20 sec game, which isn't ideal. So change it every game instead
-        q_agent.epsilon = max(q_agent.epsilon * q_agent.epsilon_decay, q_agent.min_epsilon)
+        if verbose:
+            logger.info(f"Agent made decision {init_action}")
 
-        for step in range(steps_per_episode):
+        # Epsilon Decay
+        params.q_agent.epsilon = max(
+            params.q_agent.epsilon * params.q_agent.epsilon_decay,
+            params.q_agent.min_epsilon
+        )
+
+        for step in range(params.frames_per_epoch):
             # Update Enviroment every Frame
-            environment.update(train=False)
+            params.environment.update(train=False)
 
-            # For every 90th step or 3 sec in a 30 FPS game
             if step % decision_timer == 0 and step > 0:
                 # Learn from the previous decision
-                reward = environment.compute_reward(learn_action)
+                reward = params.environment.compute_reward(init_action)
                 total_reward += reward
+
                 # Get next state
-                next_state = environment.get_state()
+                next_state = params.environment.get_state()
+                params.q_agent.learn(init_state, init_action, reward, next_state)
 
-                q_agent.learn(learn_state, learn_action, reward, next_state)
+                # Agent makes the next decision
+                next_action = params.q_agent.choose_action(next_state)
+                params.environment.set_light_state(next_action)
 
-                learn_state = next_state  # Update Learn State for the next decision
-                learn_action = q_agent.choose_action(learn_state)  # Update Learn action for the next decision
-                environment.set_light_state(learn_action)  # Set lights for the next decision
+                if verbose:
+                    logger.info(f"Agent made decision {next_action}")
 
-        environment.reset()
+        params.environment.reset()
 
-        print(f"Episode {last_episode + episode + 1}/{n_episodes} | Total Reward: {total_reward:.2f} | Epsilon: {q_agent.epsilon:.3f}")
+        print(
+            f"Episode {epoch+last_epoch+1}/{params.total_epochs} | "
+            f"Total Reward: {total_reward:.2f} | "
+            f"Epsilon: {params.q_agent.epsilon:.3f}"
+        )
 
-        q_agent.save(episode)
+        params.q_agent.save(epoch)
+
+    print("Training Finished Successfully!!")
 
 
 if __name__ == '__main__':
-    agent = QLearningAgent()
-    epoch = agent.load()
-
-    env = TrafficEnv()
-    train(agent, env, n_episodes=500, last_episode=epoch)
+    train(TrainingParameters(), verbose=True)

@@ -3,28 +3,30 @@ import sys
 from game.cars_controller import CarsController
 from game.cars_spawner import CarsSpawner
 from game.traffic_light import TrafficLight
+from game.scheduler import TrafficLightScheduler
 from ui import ui_constants
 from ui.draw import draw_edge_green_boxes, draw_lanes, draw_stop_lines, draw_traffic_lights, show_fps, show_cars
 from utils.logger import logger
 
 
 class TrafficEnv:
-    def __init__(self):
+    def __init__(self, max_cars: int = 15):
         pygame.init()
         self.screen = pygame.display.set_mode((ui_constants.WIDTH, ui_constants.HEIGHT))
         pygame.display.set_caption("Traffic Intersection Simulation")
         self.clock = pygame.time.Clock()
 
-        logger.info("Started App!")
+        # Internal State
+        self.last_reward = 0
+        self.max_cars = max_cars
 
         # Create Instances
         self.traffic_lights = [TrafficLight(d) for d in ['N', 'S', 'W', 'E']]
-        self.spawner = CarsSpawner(max_cars=15)
+        self.scheduler = TrafficLightScheduler(self.traffic_lights)
+        self.spawner = CarsSpawner(max_cars=self.max_cars)
         self.controller = CarsController(self.spawner.cars, self.traffic_lights)
 
-        # Internal State
-        self.last_reward = 0
-        self.pending_green_dirs = []
+        logger.info("Started App!")
 
     def update(self, train: bool = False):
         # ALL UI ELEMENTS
@@ -40,21 +42,9 @@ class TrafficEnv:
             show_fps(self.screen, self.clock)
 
         # CORE LOGIC
-        if self.pending_green_dirs:
-            logger.info("Updating RED lights to GREEN")
-
-            for tl in self.traffic_lights:
-                if tl.direction in self.pending_green_dirs:
-                    tl.target_state = 'GREEN'
-
-            # Reset after triggering
-            self.pending_green_dirs = []
-
-        for tl in self.traffic_lights:
-            tl.update_tl()
-
         self.last_reward = self.controller.update_cars_positions(self.screen, train)
         self.spawner.maybe_spawn_car(self.controller.lane_queues)
+        self.scheduler.update(self.spawner.cars)
 
         if not train:
             pygame.display.flip()
@@ -90,24 +80,17 @@ class TrafficEnv:
         return reward
 
     def set_light_state(self, action: int):
-        green_dirs = ['N', 'S'] if action == 0 else ['E', 'W']
-        self.pending_green_dirs = green_dirs
-
-        logger.info(f"Setting GREEN for: {green_dirs}")
-
-        for tl in self.traffic_lights:
-            if tl.direction not in green_dirs:
-                tl.target_state = 'RED'
+        self.scheduler.pending_action = action
 
     def _reset_simulation(self):
-        self.traffic_lights = [TrafficLight(d) for d in ['N', 'S', 'W', 'E']]
-        self.spawner = CarsSpawner(max_cars=15)
-        self.controller = CarsController(self.spawner.cars, self.traffic_lights)
-
+        # Internal State
         self.last_reward = 0
-        self.clear_frames = 0
-        self.required_clear_frames = 45
-        self.pending_green_dirs = []
+
+        # Create Instances
+        self.traffic_lights = [TrafficLight(d) for d in ['N', 'S', 'W', 'E']]
+        self.scheduler = TrafficLightScheduler(self.traffic_lights)
+        self.spawner = CarsSpawner(max_cars=self.max_cars)
+        self.controller = CarsController(self.spawner.cars, self.traffic_lights)
 
     def reset(self):
         self._reset_simulation()
