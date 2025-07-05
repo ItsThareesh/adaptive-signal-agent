@@ -1,7 +1,7 @@
 import random
+from utils.logger import logger
 from .car import Car
 from . import game_constants
-from utils.logger import logger
 
 
 class CarsSpawner:

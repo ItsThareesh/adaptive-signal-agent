@@ -1,5 +1,5 @@
-import pygame
 import sys
+import pygame
 from game.cars_controller import CarsController
 from game.cars_spawner import CarsSpawner
 from game.traffic_light import TrafficLight
@@ -32,6 +32,8 @@ class TrafficEnv:
     def update(self, train: bool = False, **kwargs):
         current_epoch = kwargs.get("epoch")
         render_epoch = kwargs.get("render_epoch", False)
+        current_decision = kwargs.get("decision")
+        render_decision = kwargs.get("render_decision", False)
 
         # ALL UI ELEMENTS
         if not train:
@@ -47,6 +49,9 @@ class TrafficEnv:
 
             if render_epoch and current_epoch is not None:
                 self.renderer.show_epoch(current_epoch)
+
+            if render_decision and current_decision is not None:
+                self.renderer.show_decision(current_decision)
 
         # CORE LOGIC
         self.last_reward = self.controller.update_cars_positions(self.screen, train)
@@ -64,12 +69,12 @@ class TrafficEnv:
         def bucket(x):
             if x == 0:
                 return 0
-            elif x <= 2:
-                return 1
-            elif x <= 5:
-                return 3
+            elif x <= 3:
+                return 2
+            elif x <= 6:
+                return 4
             else:
-                return 5
+                return 7
 
         return bucket(n_s_bucket), bucket(w_e_bucket)
 
@@ -83,7 +88,7 @@ class TrafficEnv:
                 self.controller.lane_queues['S'].get_total_cars()
 
         # Weighted reward
-        reward = 2 * self.last_reward - (0.5 * penalty)
+        reward = self.last_reward - 0.25 * penalty
         return reward
 
     def set_light_state(self, action: int):

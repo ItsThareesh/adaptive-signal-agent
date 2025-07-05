@@ -1,7 +1,7 @@
+from utils.logger import logger
 from .car import Car
 from .traffic_light import TrafficLight
 from .lane_queue import LaneQueue
-from utils.logger import logger
 
 
 class CarsController:
@@ -32,24 +32,16 @@ class CarsController:
                 if tl.direction != car.direction:
                     continue
 
-                # if not car.is_before_tl(tl):
-                #     break
-
-                # if tl.state == 'GREEN':
-                #     if car.is_near_tl(tl):
-                #         if car.will_cross is None and car.safely_cross_intersection(tl):
-
                 if tl.state in ['RED', 'YELLOW'] and car.is_before_tl(tl):
                     if car.is_near_tl(tl):
                         should_stop = True
                         break
-                    else:
-                        front_car = self.lane_queues[car.direction].get_front_car(car)
 
-                        # Should stop if a car is too close to the car in front of it in the respective lane
-                        if front_car and self._too_close_to_other(car, front_car):
-                            should_stop = True
-                            break
+                # Should stop if a car is too close to the car in front of it in the respective lane
+                front_car = self.lane_queues[car.direction].get_front_car(car)
+                if front_car and self._too_close_to_other(car, front_car):
+                    should_stop = True
+                    break
 
             if not should_stop:
                 car.move()
@@ -66,14 +58,14 @@ class CarsController:
     def _too_close_to_other(car: Car, front_car: Car, min_gap=35):
         if car.direction in ['N', 'S']:
             return abs(car.y - front_car.y) < min_gap
-        else:
-            return abs(car.x - front_car.x) < min_gap
+
+        return abs(car.x - front_car.x) < min_gap
 
     def _remove_out_of_bounds(self):
         for car in self.cars[:]:  # Iterate over a copy to avoid skipping elements
             if car.is_out_of_bounds():
                 if self.verbose:
-                    logger.info(f"Removed Car {car.ID}")
+                    logger.info("Removed Car %s", car.ID)
 
                 # Since I'm running this method on every frame, it's safe to think
                 # that the first car in any lane left the window frame

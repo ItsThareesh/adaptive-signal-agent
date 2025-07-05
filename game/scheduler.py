@@ -1,7 +1,7 @@
 import time
 from typing import List
-from .game_constants import YELLOW_DURATION, GREEN_DURATION
 from ui.ui_constants import CENTER, LANE_WIDTH
+from .game_constants import YELLOW_DURATION, GREEN_DURATION
 from .car import Car
 from .traffic_light import TrafficLight
 
@@ -20,7 +20,8 @@ class TrafficLightScheduler:
         self.scheduler_state = 'WAITING_FOR_NEXT_ACTION'
         self.last_switch_time = time.time()
 
-    def _is_intersection_clear(self, cars: List[Car]):
+    @staticmethod
+    def _is_intersection_clear(cars: List[Car]):
         center = CENTER
         lane_width = LANE_WIDTH // 2
         margin = 10
@@ -43,8 +44,7 @@ class TrafficLightScheduler:
         self.last_switch_time = time.time()
 
     def update(self, cars: List[Car]):
-        now = time.time()
-        elapsed = now - self.last_switch_time
+        elapsed = time.time() - self.last_switch_time
 
         if self.scheduler_state == 'GREEN':
             if elapsed >= self._green_duration:
@@ -55,9 +55,12 @@ class TrafficLightScheduler:
                 self.pending_action = None
 
         elif self.scheduler_state == 'YELLOW':
-            if self._is_intersection_clear(cars):
-                if elapsed >= self._yellow_duration:
-                    self._set_red()
+            if self._is_intersection_clear(cars) and elapsed >= self._yellow_duration:
+                self._set_red()
+
+                if self.pending_action is not None:
+                    self._apply_agent_action(self.pending_action)
+                    self.pending_action = None
 
         elif self.scheduler_state == 'WAITING_FOR_NEXT_ACTION':
             if self.pending_action is not None:

@@ -1,8 +1,8 @@
-import numpy as np
+import os
 import random
 from collections import defaultdict
-import os
 import pickle
+import numpy as np
 from utils.logger import logger
 
 
@@ -48,6 +48,7 @@ class QLearningAgent:
     def load(self, path='q_table.pkl'):
         if not os.path.exists(path):
             logger.error(f"[!] Q-table file '{path}' not found.")
+            logger.info(f"[!] Starting Game from 0 epochs")
             return 0
 
         with open(path, 'rb') as f:
