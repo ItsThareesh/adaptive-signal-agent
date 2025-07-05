@@ -11,10 +11,6 @@ class CarsSpawner:
         self.cooldown_timer = 0
         self.enable_logs = enable_log
 
-    def get_total_cars(self) -> int:
-        """ Helper method for drawing the total cars count on the screen """
-        return len(self.cars)
-
     def maybe_spawn_car(self, lane_queues: dict):
         if self.cooldown_timer > 0:
             self.cooldown_timer -= 1

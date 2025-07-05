@@ -34,13 +34,13 @@ class QLearningAgent:
         self.q_table[state][action] += self.alpha * (reward + self.gamma * max_next_q)
 
     def save(self, epochs: int, path='q_table.pkl'):
-        with open(path, 'wb') as f:
+        with open(path, 'wb') as file:
             pickle.dump(
                 {
                     'epochs': epochs,
                     'q_table': dict(self.q_table),
                     'epsilon': self.epsilon,
-                }, f
+                }, file
             )
 
         logger.info(f"[+] Q-table saved to '{path}'")

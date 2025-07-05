@@ -5,14 +5,7 @@ from game.cars_spawner import CarsSpawner
 from game.traffic_light import TrafficLight
 from game.scheduler import TrafficLightScheduler
 from ui import ui_constants
-from ui.draw import (
-    draw_edge_green_boxes,
-    draw_lanes,
-    draw_stop_lines,
-    draw_traffic_lights,
-    show_fps,
-    show_cars,
-)
+from ui.draw import DrawUIElements
 from utils.logger import logger
 
 
@@ -32,21 +25,28 @@ class TrafficEnv:
         self.scheduler = TrafficLightScheduler(self.traffic_lights)
         self.spawner = CarsSpawner(max_cars=self.max_cars)
         self.controller = CarsController(self.spawner.cars, self.traffic_lights)
+        self.renderer = DrawUIElements(self.screen)
 
         logger.info("Started App!")
 
-    def update(self, train: bool = False):
+    def update(self, train: bool = False, **kwargs):
+        current_epoch = kwargs.get("epoch")
+        render_epoch = kwargs.get("render_epoch", False)
+
         # ALL UI ELEMENTS
         if not train:
             self.screen.fill(ui_constants.UI_COLORS['BLACK'])
 
             # Render UI Elements
-            draw_edge_green_boxes(self.screen)
-            draw_lanes(self.screen)
-            draw_stop_lines(self.screen)
-            draw_traffic_lights(self.screen, self.traffic_lights)
-            show_cars(self.screen, self.spawner.get_total_cars())
-            show_fps(self.screen, self.clock)
+            self.renderer.draw_edge_green_boxes()
+            self.renderer.draw_lanes()
+            self.renderer.draw_stop_lines()
+            self.renderer.draw_traffic_lights(self.traffic_lights)
+            self.renderer.show_cars(len(self.spawner.cars))
+            self.renderer.show_fps(self.clock)
+
+            if render_epoch and current_epoch is not None:
+                self.renderer.show_epoch(current_epoch)
 
         # CORE LOGIC
         self.last_reward = self.controller.update_cars_positions(self.screen, train)

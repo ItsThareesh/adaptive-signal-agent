@@ -15,8 +15,10 @@ class TrainingParameters:
 
 
 def train(params: TrainingParameters, **kwargs):
+    # Extract Argument Values
     last_epoch = params.last_saved_epoch
     verbose = kwargs.get("verbose", False)
+    render_epoch = kwargs.get("render_epoch", False)
 
     decision_timer = int((GREEN_DURATION + YELLOW_DURATION) * FPS)
 
@@ -39,7 +41,7 @@ def train(params: TrainingParameters, **kwargs):
 
         for step in range(params.frames_per_epoch):
             # Update Enviroment every Frame
-            params.environment.update()
+            params.environment.update(epoch=epoch+last_epoch+1, render_epoch=render_epoch)
 
             if step % decision_timer == 0 and step > 0:
                 # Learn from the previous decision
@@ -65,10 +67,10 @@ def train(params: TrainingParameters, **kwargs):
             f"Epsilon: {params.q_agent.epsilon:.3f}"
         )
 
-        params.q_agent.save(epoch)
+        params.q_agent.save(epoch+last_epoch)
 
     print("Training Finished Successfully!!")
 
 
 if __name__ == '__main__':
-    train(TrainingParameters(), verbose=True)
+    train(TrainingParameters(), render_epoch=True)
