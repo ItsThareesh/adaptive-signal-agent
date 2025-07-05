@@ -21,3 +21,6 @@ class LaneQueue:
             return self.queue[car.lane][idx - 1]
 
         return None
+
+    def get_total_cars(self):
+        return len(self.queue[0]) + len(self.queue[1])

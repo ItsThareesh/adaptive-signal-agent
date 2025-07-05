@@ -1,10 +1,9 @@
-import pygame
-
-import ui.ui_constants
-from utils.logger import logger
 import random
+import pygame
+from utils.logger import logger
 from ui import ui_constants
 from . import game_constants
+from .traffic_light import TrafficLight
 
 
 class Car:
@@ -13,12 +12,14 @@ class Car:
         self.direction = direction
         self.color = random.choice(list(ui_constants.CAR_COLORS.values()))
         self.spawned = True
-        # Assume left side driving... Then the right most lane is 0th index and 1st index is left to it
+        # Assume left side driving... Right most lane is 0th index and 1st index is left to it
         self.lane = random.choice([0, 1])
+
+        self.will_cross = None
 
         self._decide_direction()
 
-    def _decide_direction(self):
+    def _decide_direction(self) -> None:
         height = ui_constants.HEIGHT
         width = ui_constants.WIDTH
         center = ui_constants.CENTER
@@ -26,7 +27,7 @@ class Car:
         lane_width_offset = ui_constants.LANE_WIDTH // 8
         grass_bos_size = ui_constants.GRASS_BOX_SIZE
 
-        if self.direction == 'N':
+        if self.direction == "N":
             if self.lane == 0:
                 self.x = grass_bos_size + lane_width_offset
                 self.vy = game_constants.CAR_SPEED
@@ -37,7 +38,7 @@ class Car:
             self.y = 0
             self.vx = 0
 
-        elif self.direction == 'S':
+        elif self.direction == "S":
             if self.lane == 0:
                 self.x = width - grass_bos_size - lane_width_offset
                 self.vy = -game_constants.CAR_SPEED
@@ -49,7 +50,7 @@ class Car:
 
             self.vx = 0
 
-        elif self.direction == 'W':
+        elif self.direction == "W":
             self.x = 0
 
             if self.lane == 0:
@@ -61,7 +62,7 @@ class Car:
 
             self.vy = 0
 
-        elif self.direction == 'E':
+        elif self.direction == "E":
             self.x = ui_constants.WIDTH
 
             if self.lane == 0:
@@ -73,20 +74,133 @@ class Car:
 
             self.vy = 0
 
-        else:
-            logger.fatal(f"Invalid direction: {self.direction}")
-            raise
-
-    def is_out_of_bounds(self):
+    def is_out_of_bounds(self) -> bool:
+        # Define Box Constraints for determining if it's out of bounds
         left_bound = 0 - game_constants.CAR_SIZE
         right_bound = ui_constants.WIDTH + game_constants.CAR_SIZE
         top_bound = 0 - game_constants.CAR_SIZE
         bottom_bound = ui_constants.HEIGHT + game_constants.CAR_SIZE
 
-        if self.x < left_bound or self.x > right_bound or self.y < top_bound or self.y > bottom_bound:
+        if (
+            self.x < left_bound
+            or self.x > right_bound
+            or self.y < top_bound
+            or self.y > bottom_bound
+        ):
             return True
-        else:
-            return False
+
+        return False
+
+    def has_crossed_intersection(self) -> bool:
+        center = ui_constants.CENTER
+        margin = 30
+
+        if self.direction == "N" and self.y >= center + margin:
+            return True
+        if self.direction == "S" and self.y <= center - margin:
+            return True
+        if self.direction == "W" and self.x >= center + margin:
+            return True
+        if self.direction == "E" and self.x <= center - margin:
+            return True
+
+        return False
+
+    def is_before_tl(self, tl: TrafficLight, stop_margin: int = 25) -> bool:
+        """
+        Checks if the given car's position is before the traffic light in appropriate direction (when it's RED)
+        """
+        if tl.direction == "N":
+            stop_line_y = ui_constants.CENTER - ui_constants.LANE_WIDTH // 2
+
+            if self.y <= stop_line_y - stop_margin:
+                return True
+
+        elif tl.direction == "S":
+            stop_line_y = ui_constants.CENTER + ui_constants.LANE_WIDTH // 2
+
+            if self.y >= stop_line_y + stop_margin:
+                return True
+
+        elif tl.direction == "W":
+            stop_line_x = ui_constants.CENTER - ui_constants.LANE_WIDTH // 2
+
+            if self.x <= stop_line_x - stop_margin:
+                return True
+
+        elif tl.direction == "E":
+            stop_line_x = ui_constants.CENTER + ui_constants.LANE_WIDTH // 2
+
+            if self.x >= stop_line_x + stop_margin:
+                return True
+
+        return False
+
+    def will_cross_intersection(self, tl: TrafficLight) -> bool:
+        """
+        Apply Simple Kinematics Equation [final_position = initial_position + velocity * time] to figure out if the
+        car crosses the traffic light within the specified time limit.
+        """
+        fps = ui_constants.FPS
+        time_left = tl.get_time_left()
+        safety_margin = 10
+
+        if tl.direction == "N":
+            cross_line_y = ui_constants.CENTER + ui_constants.LANE_WIDTH // 2
+            predicted_pos = self.y + self.vy * time_left * fps
+
+            return predicted_pos > cross_line_y + safety_margin
+
+        if tl.direction == "S":
+            cross_line_y = ui_constants.CENTER - ui_constants.LANE_WIDTH // 2
+            predicted_pos = self.y + self.vy * time_left * fps
+
+            return predicted_pos < cross_line_y - safety_margin
+
+        if tl.direction == "W":
+            cross_line_x = ui_constants.CENTER + ui_constants.LANE_WIDTH // 2
+            predicted_pos = self.x + self.vx * time_left * fps
+
+            return predicted_pos > cross_line_x + safety_margin
+
+        if tl.direction == "E":
+            cross_line_x = ui_constants.CENTER - ui_constants.LANE_WIDTH // 2
+            predicted_pos = self.x + self.vx * time_left * fps
+
+            return predicted_pos < cross_line_x - safety_margin
+
+        return False
+
+    def is_near_tl(self, tl: TrafficLight, stop_margin: int = 25) -> bool:
+        """
+        Checks if the car crosses a threshold distance for it to stop, so that the cars stop at 
+        exactly the same line near the traffic light.
+        """
+        if tl.direction == "N":
+            stop_line_y = ui_constants.CENTER - ui_constants.LANE_WIDTH // 2
+
+            if self.y >= stop_line_y - stop_margin:
+                return True
+
+        elif tl.direction == "S":
+            stop_line_y = ui_constants.CENTER + ui_constants.LANE_WIDTH // 2
+
+            if self.y <= stop_line_y + stop_margin:
+                return True
+
+        elif tl.direction == "W":
+            stop_line_x = ui_constants.CENTER - ui_constants.LANE_WIDTH // 2
+
+            if self.x >= stop_line_x - stop_margin:
+                return True
+
+        elif tl.direction == "E":
+            stop_line_x = ui_constants.CENTER + ui_constants.LANE_WIDTH // 2
+
+            if self.x <= stop_line_x + stop_margin:
+                return True
+
+        return False
 
     def move(self):
         self.x += self.vx
@@ -95,5 +209,10 @@ class Car:
     def draw(self, screen):
         car_offset = game_constants.CAR_SIZE // 2
 
-        rect = pygame.Rect(self.x - car_offset, self.y - car_offset, game_constants.CAR_SIZE, game_constants.CAR_SIZE)
+        rect = pygame.Rect(
+            self.x - car_offset,
+            self.y - car_offset,
+            game_constants.CAR_SIZE,
+            game_constants.CAR_SIZE,
+        )
         pygame.draw.rect(screen, self.color, rect)
