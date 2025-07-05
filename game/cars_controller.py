@@ -17,7 +17,7 @@ class CarsController:
         self._initialize_lane_queue()
 
     def _initialize_lane_queue(self):
-        for dirctn in ['N', 'S', 'W', 'E']:
+        for dirctn in ["N", "S", "W", "E"]:
             self.lane_queues[dirctn] = LaneQueue()
 
     def update_cars_positions(self, screen, train=False) -> int:
@@ -28,11 +28,11 @@ class CarsController:
             should_stop = False
 
             for tl in self.traffic_lights:
-                # If Car's Direction and Traffic Light Direction isn't the same, then go to next iteration
+                # If Car's and Traffic Light Direction isn't the same, then go to next iteration
                 if tl.direction != car.direction:
                     continue
 
-                if tl.state in ['RED', 'YELLOW'] and car.is_before_tl(tl):
+                if tl.state in ["RED", "YELLOW"] and car.is_before_tl(tl):
                     if car.is_near_tl(tl):
                         should_stop = True
                         break
@@ -56,7 +56,7 @@ class CarsController:
 
     @staticmethod
     def _too_close_to_other(car: Car, front_car: Car, min_gap=35):
-        if car.direction in ['N', 'S']:
+        if car.direction in ["N", "S"]:
             return abs(car.y - front_car.y) < min_gap
 
         return abs(car.x - front_car.x) < min_gap

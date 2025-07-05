@@ -63,8 +63,11 @@ class TrafficEnv:
             self.clock.tick(ui_constants.FPS)
 
     def get_state(self) -> tuple:
-        n_s_bucket = self.controller.lane_queues['N'].get_total_cars() + self.controller.lane_queues['S'].get_total_cars()
-        w_e_bucket = self.controller.lane_queues['W'].get_total_cars() + self.controller.lane_queues['E'].get_total_cars()
+        n_s_bucket = self.controller.lane_queues['N'].get_total_cars() + \
+            self.controller.lane_queues['S'].get_total_cars()
+
+        w_e_bucket = self.controller.lane_queues['W'].get_total_cars() +  \
+            self.controller.lane_queues['E'].get_total_cars()
 
         def bucket(x):
             if x == 0:

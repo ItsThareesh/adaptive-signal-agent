@@ -34,7 +34,7 @@ def train(params: TrainingParameters, **kwargs):
         params.environment.set_light_state(init_action)
 
         if verbose:
-            logger.info(f"Decision {decision_count}: {init_action}")
+            logger.info("Decision %d: %d", decision_count, init_action)
 
         for step in range(decision_timer * params.decisions_per_epoch):
             # Update Enviroment every Frame
@@ -61,7 +61,7 @@ def train(params: TrainingParameters, **kwargs):
                 decision_count += 1
 
                 if verbose:
-                    logger.info(f"Decision {decision_count}: {next_action}")
+                    logger.info("Decision %d: %d", decision_count, next_action)
 
         params.environment.reset()
 
