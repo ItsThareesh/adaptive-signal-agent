@@ -15,6 +15,7 @@ class QLearningAgent:
         epsilon=1.0,
         min_epsilon=0.1,
         epsilon_decay=0.955,
+        exploit=False
     ):
         self.action_space = action_space
         self.q_table = defaultdict(lambda: np.zeros(action_space))
@@ -25,6 +26,10 @@ class QLearningAgent:
         self.epsilon = epsilon  # Exploration Rate
         self.min_epsilon = min_epsilon  # Min Exploration Rate upon decaying
         self.epsilon_decay = epsilon_decay  # Exploration Decay Rate
+
+        if exploit:
+            self.epsilon = 0.0
+            logger.info("[✓] Exploitation Enabled.")
 
     def choose_action(self, state):
         """

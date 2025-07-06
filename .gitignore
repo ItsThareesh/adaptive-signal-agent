@@ -3,4 +3,3 @@ __pycache__
 .idea
 *.ipynb
 q-learning.py
-q_table.pkl

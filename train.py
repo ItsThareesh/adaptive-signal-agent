@@ -9,7 +9,7 @@ class TrainingParameters:
     def __init__(self):
         self.agent = QLearningAgent()
         self.environment = TrafficEnv()
-        self.total_epochs = 500
+        self.total_epochs = 100
         self.decisions_per_epoch = 15
         self.last_saved_epoch = self.agent.load()
 
@@ -93,4 +93,4 @@ def train(params: TrainingParameters, **kwargs):
 
 
 if __name__ == "__main__":
-    train(TrainingParameters(), verbose=True, render_game=True)
+    train(TrainingParameters(), verbose=True)
