@@ -91,7 +91,7 @@ class DrawUIElements:
     def draw_stop_lines(self):
         color = ui_constants.UI_COLORS["WHITE"]
 
-        stop_line_len = 60
+        stop_line_len = ui_constants.LANE_WIDTH // 2 * 0.85
         center = ui_constants.CENTER
         half_lane_dst = ui_constants.LANE_WIDTH // 2
 
