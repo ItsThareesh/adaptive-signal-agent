@@ -31,12 +31,12 @@ def train(params: TrainingParameters, **kwargs):
         epoch_id = epoch + last_epoch + 1
 
         # Initial decision
-        init_state = params.environment.get_state()
-        init_action = params.agent.choose_action(init_state)
-        params.environment.set_light_state(init_action)
+        state = params.environment.get_state()
+        action = params.agent.choose_action(state)
+        params.environment.set_light_state(action)
 
         if verbose:
-            logger.info("Epoch %d, Decision %d: %d", epoch_id, decision_count, init_action)
+            logger.info("Epoch %d, Decision %d: %d", epoch_id, decision_count, action)
 
         for step in range(decision_timer * params.decisions_per_epoch):
             # Update Enviroment every Frame
@@ -50,21 +50,26 @@ def train(params: TrainingParameters, **kwargs):
 
             if step % decision_timer == 0 and step > 0:
                 # Learn from the previous decision
-                reward = params.environment.compute_reward(init_action)
+                reward = params.environment.compute_reward(action)
                 total_reward += reward
 
                 # Get next state
                 next_state = params.environment.get_state()
-                params.agent.learn(init_state, init_action, reward, next_state)
+                params.agent.learn(state, action, reward, next_state)
 
                 # Agent makes the next decision
                 next_action = params.agent.choose_action(next_state)
                 params.environment.set_light_state(next_action)
 
+                # Decision logging
                 decision_count += 1
 
                 if verbose:
-                    logger.info("Epoch %d, Decision %d: %d", epoch_id, decision_count, next_action)
+                    logger.info("Epoch %d, Decision %d: %d", epoch_id, decision_count, action)
+
+                # Update for next iteration
+                state = next_state
+                action = next_action
 
         params.environment.reset()
 
