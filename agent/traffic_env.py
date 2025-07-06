@@ -29,14 +29,14 @@ class TrafficEnv:
 
         logger.info("Started App!")
 
-    def update(self, train: bool = False, **kwargs):
+    def update(self, render_game: bool = False, **kwargs):
         current_epoch = kwargs.get("epoch")
         render_epoch = kwargs.get("render_epoch", False)
         current_decision = kwargs.get("decision")
         render_decision = kwargs.get("render_decision", False)
 
         # ALL UI ELEMENTS
-        if not train:
+        if render_game:
             self.screen.fill(ui_constants.UI_COLORS['BLACK'])
 
             # Render UI Elements
@@ -54,44 +54,41 @@ class TrafficEnv:
                 self.renderer.show_decision(current_decision)
 
         # CORE LOGIC
-        self.last_reward = self.controller.update_cars_positions(self.screen, train)
+        self.last_reward = self.controller.update_cars_positions(self.screen, render_game)
         self.spawner.maybe_spawn_car(self.controller.lane_queues)
         self.scheduler.update(self.spawner.cars)
 
-        if not train:
-            pygame.display.flip()
-            self.clock.tick(ui_constants.FPS)
+        pygame.display.flip()
+        self.clock.tick(ui_constants.FPS)
 
     def get_state(self) -> tuple:
-        n_s_bucket = self.controller.lane_queues['N'].get_total_cars() + \
-            self.controller.lane_queues['S'].get_total_cars()
-
-        w_e_bucket = self.controller.lane_queues['W'].get_total_cars() +  \
-            self.controller.lane_queues['E'].get_total_cars()
-
         def bucket(x):
             if x == 0:
                 return 0
-            elif x <= 3:
+            if x <= 2:
+                return 1
+            if x <= 5:
                 return 2
-            elif x <= 6:
-                return 4
-            else:
-                return 7
 
-        return bucket(n_s_bucket), bucket(w_e_bucket)
+            return 3
+
+        state = tuple(
+            bucket(self.controller.lane_queues[dir].get_total_cars())
+            for dir in ["N", "S", "W", "E"]
+        )
+
+        return (*state, self.scheduler.current_action)
 
     def compute_reward(self, action):
-        # Get total cars in both directions
-        if action == 0:
-            penalty = self.controller.lane_queues['E'].get_total_cars() + \
-                self.controller.lane_queues['W'].get_total_cars()
-        else:
-            penalty = self.controller.lane_queues['N'].get_total_cars() + \
-                self.controller.lane_queues['S'].get_total_cars()
+        # Determine which lanes are served and unserved
+        served_dirs = ["N", "S"] if action == 0 else ["W", "E"]
+        unserved_dirs = ['E', 'W'] if action == 0 else ['N', 'S']
 
-        # Weighted reward
-        reward = self.last_reward - 0.25 * penalty
+        unserved_q = sum(self.controller.lane_queues[d].get_total_cars() for d in unserved_dirs)
+        served_q = sum(self.controller.lane_queues[d].get_total_cars() for d in served_dirs)
+        imbalance_penalty = abs(served_q - unserved_q)
+
+        reward = self.last_reward - 0.3 * unserved_q - 0.2 * imbalance_penalty
         return reward
 
     def set_light_state(self, action: int):

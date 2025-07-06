@@ -28,7 +28,7 @@ class CarsSpawner:
         new_car.ID = len(self.cars) + 1
 
         if self.enable_logs:
-            logger.info(f"Spawning Car {new_car.ID} heading {direction}")  # Log the information
+            logger.info("Spawning Car %d heading %s", new_car.ID, direction)  # Log the information
 
         lane_queues[new_car.direction].enqueue(new_car)
         self.cars.append(new_car)

@@ -7,19 +7,21 @@ from utils.logger import logger
 
 class TrainingParameters:
     def __init__(self):
-        self.q_agent = QLearningAgent()
+        self.agent = QLearningAgent()
         self.environment = TrafficEnv()
         self.total_epochs = 500
         self.decisions_per_epoch = 15
-        self.last_saved_epoch = self.q_agent.load()
+        self.last_saved_epoch = self.agent.load()
 
 
 def train(params: TrainingParameters, **kwargs):
     # Extract Argument Values
     last_epoch = params.last_saved_epoch
     verbose = kwargs.get("verbose", False)
-    render_epoch = kwargs.get("render_epoch", False)
-    render_decision = kwargs.get("render_decision", False)
+    render_game = kwargs.get("render_game", False)
+    # If render game is True, then display epoch and decision count by default
+    render_epoch = kwargs.get("render_epoch", render_game)
+    render_decision = kwargs.get("render_decision", render_game)
 
     decision_timer = int((GREEN_DURATION + YELLOW_DURATION) * FPS)
 
@@ -30,8 +32,12 @@ def train(params: TrainingParameters, **kwargs):
 
         # Initial decision
         init_state = params.environment.get_state()
-        init_action = params.q_agent.choose_action(init_state)
+        init_action = params.agent.choose_action(init_state)
         params.environment.set_light_state(init_action)
+
+        # Bump up Epsilon once in a while
+        if epoch % 35 == 0 and epoch > 0:
+            params.agent.epsilon += 0.3
 
         if verbose:
             logger.info("Decision %d: %d", decision_count, init_action)
@@ -39,6 +45,7 @@ def train(params: TrainingParameters, **kwargs):
         for step in range(decision_timer * params.decisions_per_epoch):
             # Update Enviroment every Frame
             params.environment.update(
+                render_game=render_game,
                 epoch=epoch_id,
                 render_epoch=render_epoch,
                 decision=decision_count,
@@ -52,10 +59,10 @@ def train(params: TrainingParameters, **kwargs):
 
                 # Get next state
                 next_state = params.environment.get_state()
-                params.q_agent.learn(init_state, init_action, reward, next_state)
+                params.agent.learn(init_state, init_action, reward, next_state)
 
                 # Agent makes the next decision
-                next_action = params.q_agent.choose_action(next_state)
+                next_action = params.agent.choose_action(next_state)
                 params.environment.set_light_state(next_action)
 
                 decision_count += 1
@@ -65,22 +72,24 @@ def train(params: TrainingParameters, **kwargs):
 
         params.environment.reset()
 
-        print(
-            f"Episode {epoch+last_epoch+1}/{params.total_epochs} | "
-            f"Total Reward: {total_reward:.2f} | "
-            f"Epsilon: {params.q_agent.epsilon:.3f}"
+        logger.info(
+            "Episode %d/%d | Total Reward: %.2f | Epsilon: %.3f",
+            epoch + last_epoch + 1,
+            params.total_epochs,
+            total_reward,
+            params.agent.epsilon
         )
 
         # Epsilon Decay
-        params.q_agent.epsilon = max(
-            params.q_agent.epsilon * params.q_agent.epsilon_decay,
-            params.q_agent.min_epsilon,
+        params.agent.epsilon = max(
+            params.agent.epsilon * params.agent.epsilon_decay,
+            params.agent.min_epsilon,
         )
 
-        params.q_agent.save(epoch_id)
+        params.agent.save(epoch_id)
 
     print("Training Finished Successfully!!")
 
 
 if __name__ == "__main__":
-    train(TrainingParameters(), render_epoch=True, render_decision=True)
+    train(TrainingParameters(), verbose=True, render_game=True)

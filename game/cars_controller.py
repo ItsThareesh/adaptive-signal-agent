@@ -20,7 +20,7 @@ class CarsController:
         for dirctn in ["N", "S", "W", "E"]:
             self.lane_queues[dirctn] = LaneQueue()
 
-    def update_cars_positions(self, screen, train=False) -> int:
+    def update_cars_positions(self, screen, render_game: bool = False) -> int:
         self._remove_out_of_bounds()
         cars_passed = 0
 
@@ -49,7 +49,7 @@ class CarsController:
             if car.has_crossed_intersection():
                 cars_passed += 1
 
-            if not train:
+            if render_game:
                 car.draw(screen)
 
         return cars_passed

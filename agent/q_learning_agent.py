@@ -56,8 +56,7 @@ class QLearningAgent:
 
     def load(self, path="q_table.pkl"):
         if not os.path.exists(path):
-            logger.error("[!] Q-table file '%s' not found.", path)
-            logger.info("[!] Starting Game from 0 epochs.")
+            logger.error("[!] Q-table file '%s' not found. New Game Starting...", path)
             return 0
 
         with open(path, "rb") as f:

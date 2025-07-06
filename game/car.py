@@ -1,6 +1,5 @@
 import random
 import pygame
-from utils.logger import logger
 from ui import ui_constants
 from . import game_constants
 from .traffic_light import TrafficLight
@@ -108,7 +107,8 @@ class Car:
 
     def is_before_tl(self, tl: TrafficLight, stop_margin: int = 25) -> bool:
         """
-        Checks if the given car's position is before the traffic light in appropriate direction (when it's RED)
+        Checks if the given car's position is before the traffic light
+        in appropriate direction (when it's RED)
         """
         if tl.direction == "N":
             stop_line_y = ui_constants.CENTER - ui_constants.LANE_WIDTH // 2
@@ -138,8 +138,8 @@ class Car:
 
     def will_cross_intersection(self, tl: TrafficLight) -> bool:
         """
-        Apply Simple Kinematics Equation [final_position = initial_position + velocity * time] to figure out if the
-        car crosses the traffic light within the specified time limit.
+        Apply Simple Kinematics Equation [final_position = initial_position + velocity * time]
+        to figure out if the car crosses the traffic light within the specified time limit.
         """
         fps = ui_constants.FPS
         time_left = tl.get_time_left()
@@ -173,7 +173,7 @@ class Car:
 
     def is_near_tl(self, tl: TrafficLight, stop_margin: int = 25) -> bool:
         """
-        Checks if the car crosses a threshold distance for it to stop, so that the cars stop at 
+        Checks if the car crosses a threshold distance for it to stop, so that the cars stop at
         exactly the same line near the traffic light.
         """
         if tl.direction == "N":
