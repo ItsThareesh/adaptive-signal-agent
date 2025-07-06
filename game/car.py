@@ -107,8 +107,7 @@ class Car:
 
     def is_before_tl(self, tl: TrafficLight, stop_margin: int = 25) -> bool:
         """
-        Checks if the given car's position is before the traffic light
-        in appropriate direction (when it's RED)
+        Checks if the given car's position is before the traffic light in appropriate direction
         """
         if tl.direction == "N":
             stop_line_y = ui_constants.CENTER - ui_constants.LANE_WIDTH // 2
@@ -133,41 +132,6 @@ class Car:
 
             if self.x >= stop_line_x + stop_margin:
                 return True
-
-        return False
-
-    def will_cross_intersection(self, tl: TrafficLight) -> bool:
-        """
-        Apply Simple Kinematics Equation [final_position = initial_position + velocity * time]
-        to figure out if the car crosses the traffic light within the specified time limit.
-        """
-        fps = ui_constants.FPS
-        time_left = tl.get_time_left()
-        safety_margin = 10
-
-        if tl.direction == "N":
-            cross_line_y = ui_constants.CENTER + ui_constants.LANE_WIDTH // 2
-            predicted_pos = self.y + self.vy * time_left * fps
-
-            return predicted_pos > cross_line_y + safety_margin
-
-        if tl.direction == "S":
-            cross_line_y = ui_constants.CENTER - ui_constants.LANE_WIDTH // 2
-            predicted_pos = self.y + self.vy * time_left * fps
-
-            return predicted_pos < cross_line_y - safety_margin
-
-        if tl.direction == "W":
-            cross_line_x = ui_constants.CENTER + ui_constants.LANE_WIDTH // 2
-            predicted_pos = self.x + self.vx * time_left * fps
-
-            return predicted_pos > cross_line_x + safety_margin
-
-        if tl.direction == "E":
-            cross_line_x = ui_constants.CENTER - ui_constants.LANE_WIDTH // 2
-            predicted_pos = self.x + self.vx * time_left * fps
-
-            return predicted_pos < cross_line_x - safety_margin
 
         return False
 

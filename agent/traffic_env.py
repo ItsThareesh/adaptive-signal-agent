@@ -17,11 +17,14 @@ class TrafficEnv:
         self.clock = pygame.time.Clock()
 
         # Internal State
-        self.last_reward = 0
         self.max_cars = max_cars
+        self.last_reward = 0
+        self.last_action = None
+        self.repeat_count = 0
+        self.cars_waiting = {"N": 0, "S": 0, "W": 0, "E": 0}
 
         # Create Instances
-        self.traffic_lights = [TrafficLight(d) for d in ['N', 'S', 'W', 'E']]
+        self.traffic_lights = [TrafficLight(d) for d in ["N", "S", "W", "E"]]
         self.scheduler = TrafficLightScheduler(self.traffic_lights)
         self.spawner = CarsSpawner(max_cars=self.max_cars)
         self.controller = CarsController(self.spawner.cars, self.traffic_lights)
@@ -37,7 +40,7 @@ class TrafficEnv:
 
         # ALL UI ELEMENTS
         if render_game:
-            self.screen.fill(ui_constants.UI_COLORS['BLACK'])
+            self.screen.fill(ui_constants.UI_COLORS["BLACK"])
 
             # Render UI Elements
             self.renderer.draw_edge_green_boxes()
@@ -54,7 +57,9 @@ class TrafficEnv:
                 self.renderer.show_decision(current_decision)
 
         # CORE LOGIC
-        self.last_reward = self.controller.update_cars_positions(self.screen, render_game)
+        self.cars_waiting, self.last_reward = self.controller.update_cars_positions(
+            self.screen, render_game
+        )
         self.spawner.maybe_spawn_car(self.controller.lane_queues)
         self.scheduler.update(self.spawner.cars)
 
@@ -63,35 +68,39 @@ class TrafficEnv:
 
     def get_state(self) -> tuple:
         def bucket(x):
-            if x == 0:
-                return 0
-            if x <= 2:
-                return 1
-            if x <= 5:
-                return 2
+            return min(x, 5)
 
-            return 3
-
-        state = tuple(
-            bucket(self.controller.lane_queues[dir].get_total_cars())
-            for dir in ["N", "S", "W", "E"]
-        )
+        state = tuple(bucket(self.cars_waiting[dir]) for dir in ["N", "S", "W", "E"])
 
         return (*state, self.scheduler.current_action)
 
     def compute_reward(self, action):
         # Determine which lanes are served and unserved
-        served_dirs = ["N", "S"] if action == 0 else ["W", "E"]
-        unserved_dirs = ['E', 'W'] if action == 0 else ['N', 'S']
+        action_dirs = {0: ["N", "S"], 1: ["W", "E"]}
 
-        unserved_q = sum(self.controller.lane_queues[d].get_total_cars() for d in unserved_dirs)
-        served_q = sum(self.controller.lane_queues[d].get_total_cars() for d in served_dirs)
+        served_q = sum(
+            self.controller.lane_queues[d].get_total_cars() for d in action_dirs[action]
+        )
+        unserved_q = sum(
+            self.controller.lane_queues[d].get_total_cars()
+            for d in action_dirs[action ^ 1]
+        )
         imbalance_penalty = abs(served_q - unserved_q)
 
-        reward = self.last_reward - 0.3 * unserved_q - 0.2 * imbalance_penalty
+        reward = 1.25 * self.last_reward - 0.3 * unserved_q - 0.2 * imbalance_penalty
+
+        if self.repeat_count >= 3:
+            reward -= self.repeat_count * 0.2
+
         return reward
 
     def set_light_state(self, action: int):
+        if self.last_action is not None and self.last_action == action:
+            self.repeat_count += 1
+        else:
+            self.repeat_count = 1
+            self.last_action = action
+
         self.scheduler.pending_action = action
 
     def _reset_simulation(self):
@@ -99,7 +108,7 @@ class TrafficEnv:
         self.last_reward = 0
 
         # Create Instances
-        self.traffic_lights = [TrafficLight(d) for d in ['N', 'S', 'W', 'E']]
+        self.traffic_lights = [TrafficLight(d) for d in ["N", "S", "W", "E"]]
         self.scheduler = TrafficLightScheduler(self.traffic_lights)
         self.spawner = CarsSpawner(max_cars=self.max_cars)
         self.controller = CarsController(self.spawner.cars, self.traffic_lights)

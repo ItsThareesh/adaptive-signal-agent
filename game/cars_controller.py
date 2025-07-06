@@ -22,6 +22,7 @@ class CarsController:
 
     def update_cars_positions(self, screen, render_game: bool = False) -> int:
         self._remove_out_of_bounds()
+        cars_waiting = {'N': 0, 'S': 0, 'W': 0, 'E': 0}
         cars_passed = 0
 
         for car in self.cars:
@@ -33,6 +34,8 @@ class CarsController:
                     continue
 
                 if tl.state in ["RED", "YELLOW"] and car.is_before_tl(tl):
+                    cars_waiting[tl.direction] += 1
+
                     if car.is_near_tl(tl):
                         should_stop = True
                         break
@@ -52,7 +55,7 @@ class CarsController:
             if render_game:
                 car.draw(screen)
 
-        return cars_passed
+        return (cars_waiting, cars_passed)
 
     @staticmethod
     def _too_close_to_other(car: Car, front_car: Car, min_gap=35):

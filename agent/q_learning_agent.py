@@ -10,11 +10,11 @@ class QLearningAgent:
     def __init__(
         self,
         action_space=2,
-        alpha=0.1,
+        alpha=0.25,
         gamma=0.9,
         epsilon=1.0,
         min_epsilon=0.1,
-        epsilon_decay=0.95,
+        epsilon_decay=0.955,
     ):
         self.action_space = action_space
         self.q_table = defaultdict(lambda: np.zeros(action_space))

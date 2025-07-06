@@ -1,2 +1,5 @@
+[MAIN]
+fail-under=8
+
 [MESSAGES CONTROL]
 disable=E0401,E1101

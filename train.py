@@ -35,12 +35,8 @@ def train(params: TrainingParameters, **kwargs):
         init_action = params.agent.choose_action(init_state)
         params.environment.set_light_state(init_action)
 
-        # Bump up Epsilon once in a while
-        if epoch % 35 == 0 and epoch > 0:
-            params.agent.epsilon += 0.3
-
         if verbose:
-            logger.info("Decision %d: %d", decision_count, init_action)
+            logger.info("Epoch %d, Decision %d: %d", epoch_id, decision_count, init_action)
 
         for step in range(decision_timer * params.decisions_per_epoch):
             # Update Enviroment every Frame
@@ -68,7 +64,7 @@ def train(params: TrainingParameters, **kwargs):
                 decision_count += 1
 
                 if verbose:
-                    logger.info("Decision %d: %d", decision_count, next_action)
+                    logger.info("Epoch %d, Decision %d: %d", epoch_id, decision_count, next_action)
 
         params.environment.reset()
 
