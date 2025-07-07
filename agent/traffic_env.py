@@ -5,12 +5,12 @@ from game.cars_spawner import CarsSpawner
 from game.traffic_light import TrafficLight
 from game.scheduler import TrafficLightScheduler
 from ui import ui_constants
-from ui.draw import DrawUIElements
+from ui.renderer import RenderUI
 from utils.logger import logger
 
 
 class TrafficEnv:
-    def __init__(self, max_cars: int = 15):
+    def __init__(self, max_cars: int = 20):
         pygame.init()
         self.screen = pygame.display.set_mode((ui_constants.WIDTH, ui_constants.HEIGHT))
         pygame.display.set_caption("Traffic Intersection Simulation")
@@ -24,11 +24,11 @@ class TrafficEnv:
         self.cars_waiting = {"N": 0, "S": 0, "W": 0, "E": 0}
 
         # Create Instances
-        self.traffic_lights = [TrafficLight(d) for d in ["N", "S", "W", "E"]]
-        self.scheduler = TrafficLightScheduler(self.traffic_lights)
         self.spawner = CarsSpawner(max_cars=self.max_cars)
+        self.traffic_lights = [TrafficLight(d) for d in ["N", "S", "W", "E"]]
+        self.scheduler = TrafficLightScheduler(self.traffic_lights, self.spawner.cars)
         self.controller = CarsController(self.spawner.cars, self.traffic_lights)
-        self.renderer = DrawUIElements(self.screen)
+        self.renderer = RenderUI(self.screen)
 
         logger.info("Started App!")
 
@@ -38,10 +38,17 @@ class TrafficEnv:
         current_decision = kwargs.get("decision")
         render_decision = kwargs.get("render_decision", False)
 
-        # ALL UI ELEMENTS
-        if render_game:
-            self.screen.fill(ui_constants.UI_COLORS["BLACK"])
+        self.screen.fill(ui_constants.UI_COLORS["BLACK"])
 
+        # CORE LOGIC
+        self.cars_waiting, self.last_reward = self.controller.update_cars_positions(
+            self.screen, render_game
+        )
+        self.spawner.maybe_spawn_car(self.controller.lane_queues)
+        self.scheduler.update()
+
+        # Draw UI Elements
+        if render_game:
             # Render UI Elements
             self.renderer.draw_edge_green_boxes()
             self.renderer.draw_lanes()
@@ -56,13 +63,7 @@ class TrafficEnv:
             if render_decision and current_decision is not None:
                 self.renderer.show_decision(current_decision)
 
-        # CORE LOGIC
-        self.cars_waiting, self.last_reward = self.controller.update_cars_positions(
-            self.screen, render_game
-        )
-        self.spawner.maybe_spawn_car(self.controller.lane_queues)
-        self.scheduler.update(self.spawner.cars)
-
+        # Pygame
         pygame.display.flip()
         self.clock.tick(ui_constants.FPS)
 
@@ -101,17 +102,21 @@ class TrafficEnv:
             self.repeat_count = 1
             self.last_action = action
 
-        self.scheduler.pending_action = action
+        self.scheduler.pending_actions.put(action)
 
     def _reset_simulation(self):
         # Internal State
         self.last_reward = 0
+        self.last_action = None
+        self.repeat_count = 0
+        self.cars_waiting = {"N": 0, "S": 0, "W": 0, "E": 0}
 
         # Create Instances
-        self.traffic_lights = [TrafficLight(d) for d in ["N", "S", "W", "E"]]
-        self.scheduler = TrafficLightScheduler(self.traffic_lights)
         self.spawner = CarsSpawner(max_cars=self.max_cars)
+        self.traffic_lights = [TrafficLight(d) for d in ["N", "S", "W", "E"]]
+        self.scheduler = TrafficLightScheduler(self.traffic_lights, self.spawner.cars)
         self.controller = CarsController(self.spawner.cars, self.traffic_lights)
+        self.renderer = RenderUI(self.screen)
 
     def reset(self):
         self._reset_simulation()

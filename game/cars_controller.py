@@ -49,7 +49,7 @@ class CarsController:
             if not should_stop:
                 car.move()
 
-            if car.has_crossed_intersection():
+            if car.has_crossed_middle():
                 cars_passed += 1
 
             if render_game:
@@ -70,8 +70,8 @@ class CarsController:
                 if self.verbose:
                     logger.info("Removed Car %s", car.ID)
 
-                # Since I'm running this method on every frame, it's safe to think
-                # that the first car in any lane left the window frame
+                # Since I'm running this method on every frame, it's safe to
+                # think that the first car in any lane left the window frame
                 lane_queue = self.lane_queues[car.direction]
                 if lane_queue.peek(car.lane) == car:
                     lane_queue.dequeue(car.lane)

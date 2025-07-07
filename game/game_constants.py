@@ -1,7 +1,6 @@
 # CAR Properties
 CAR_SIZE = 20
 CAR_SPEED = 2
-SPAWN_PROBABILITY = 1
 COOLDOWN_TIMER = 20
 
 # Traffic Light Properties

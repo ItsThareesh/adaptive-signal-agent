@@ -1,9 +1,8 @@
+import pygame
 from agent.q_learning_agent import QLearningAgent
 from agent.traffic_env import TrafficEnv
 from game.game_constants import GREEN_DURATION, YELLOW_DURATION
 from ui.ui_constants import FPS
-
-import pygame
 
 
 def main():

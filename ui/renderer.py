@@ -3,7 +3,7 @@ from game.traffic_light import TrafficLight
 from . import ui_constants
 
 
-class DrawUIElements:
+class RenderUI:
     def __init__(self, screen):
         self.screen = screen
         self.height = screen.get_height()

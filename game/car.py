@@ -90,7 +90,7 @@ class Car:
 
         return False
 
-    def has_crossed_intersection(self) -> bool:
+    def has_crossed_middle(self) -> bool:
         center = ui_constants.CENTER
         margin = 30
 

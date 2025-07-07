@@ -5,18 +5,18 @@ from . import game_constants
 
 
 class CarsSpawner:
-    def __init__(self, max_cars: int = 10, enable_log: bool = False):
+    def __init__(self, max_cars, verbose: bool = False):
         self.cars: list[Car] = []
         self.max_cars = max_cars
         self.cooldown_timer = 0
-        self.enable_logs = enable_log
+        self.enable_logs = verbose
 
     def maybe_spawn_car(self, lane_queues: dict):
         if self.cooldown_timer > 0:
             self.cooldown_timer -= 1
             return
 
-        if random.random() < game_constants.SPAWN_PROBABILITY and len(self.cars) < self.max_cars:
+        if len(self.cars) < self.max_cars:
             self.spawn_car(lane_queues)
             self.cooldown_timer = game_constants.COOLDOWN_TIMER
 

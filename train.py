@@ -18,6 +18,8 @@ def train(params: TrainingParameters, **kwargs):
     # Extract Argument Values
     last_epoch = params.last_saved_epoch
     verbose = kwargs.get("verbose", False)
+
+    # Rendering Params
     render_game = kwargs.get("render_game", False)
     # If render game is True, then display epoch and decision count by default
     render_epoch = kwargs.get("render_epoch", render_game)
@@ -89,7 +91,7 @@ def train(params: TrainingParameters, **kwargs):
 
         params.agent.save(epoch_id)
 
-    print("Training Finished Successfully!!")
+    logger.info("[✓] Training Finished Successfully!!")
 
 
 if __name__ == "__main__":

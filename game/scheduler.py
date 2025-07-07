@@ -1,3 +1,4 @@
+from queue import Queue
 import time
 from typing import List
 from ui.ui_constants import CENTER, LANE_WIDTH
@@ -7,8 +8,9 @@ from .traffic_light import TrafficLight
 
 
 class TrafficLightScheduler:
-    def __init__(self, traffic_lights: list[TrafficLight]):
+    def __init__(self, traffic_lights: list[TrafficLight], cars: List[Car]):
         self.traffic_lights = traffic_lights
+        self.cars = cars
 
         # Light Cooldowns
         self._yellow_duration = YELLOW_DURATION
@@ -16,17 +18,16 @@ class TrafficLightScheduler:
 
         # Internal State
         self.current_action = None
-        self.pending_action = None
+        self.pending_actions = Queue()
         self.scheduler_state = 'WAITING_FOR_NEXT_ACTION'
         self.last_switch_time = time.time()
 
-    @staticmethod
-    def _is_intersection_clear(cars: List[Car]):
+    def _is_intersection_clear(self):
         center = CENTER
         lane_width = LANE_WIDTH // 2
         margin = 10
 
-        for car in cars:
+        for car in self.cars:
             if center - lane_width - margin < car.x < center + lane_width + margin and \
                     center - lane_width - margin < car.y < center + lane_width + margin:
                 return False
@@ -43,29 +44,33 @@ class TrafficLightScheduler:
         self.scheduler_state = 'GREEN'
         self.last_switch_time = time.time()
 
-    def update(self, cars: List[Car]):
+    def update(self):
         elapsed = time.time() - self.last_switch_time
 
         if self.scheduler_state == 'GREEN':
             if elapsed >= self._green_duration:
-                if self.pending_action is not None and self.pending_action != self.current_action:
-                    self._set_yellow()
+                # Check if the new pending action is differnet from current action
+                if not self.pending_actions.empty():
+                    next_action = self.pending_actions.queue[0]
 
-            elif self.pending_action == self.current_action:
-                self.pending_action = None
+                    # If the next action is the same as current, just remove it
+                    if next_action == self.current_action:
+                        self.pending_actions.get()
+                    else:
+                        self._set_yellow()
 
         elif self.scheduler_state == 'YELLOW':
-            if self._is_intersection_clear(cars) and elapsed >= self._yellow_duration:
+            if self._is_intersection_clear() and elapsed >= self._yellow_duration:
                 self._set_red()
 
-                if self.pending_action is not None:
-                    self._apply_agent_action(self.pending_action)
-                    self.pending_action = None
+                if not self.pending_actions.empty():
+                    next_action = self.pending_actions.get()
+                    self._apply_agent_action(next_action)
 
         elif self.scheduler_state == 'WAITING_FOR_NEXT_ACTION':
-            if self.pending_action is not None:
-                self._apply_agent_action(self.pending_action)
-                self.pending_action = None
+            if not self.pending_actions.empty():
+                next_action = self.pending_actions.get()
+                self._apply_agent_action(next_action)
 
     def _set_yellow(self):
         for tl in self.traffic_lights:
