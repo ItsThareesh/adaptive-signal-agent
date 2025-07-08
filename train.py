@@ -95,4 +95,4 @@ def train(params: TrainingParameters, **kwargs):
 
 
 if __name__ == "__main__":
-    train(TrainingParameters(), verbose=True)
+    train(TrainingParameters(), render_game=True, verbose=True)

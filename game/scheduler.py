@@ -34,7 +34,7 @@ class TrafficLightScheduler:
 
         return True
 
-    def _apply_agent_action(self, action: int):
+    def _apply_agent_action(self, action: int, cur_time):
         green_dirs = ['N', 'S'] if action == 0 else ['E', 'W']
 
         for tl in self.traffic_lights:
@@ -42,46 +42,53 @@ class TrafficLightScheduler:
 
         self.current_action = action
         self.scheduler_state = 'GREEN'
-        self.last_switch_time = time.time()
+        self.last_switch_time = cur_time
 
-    def update(self):
-        elapsed = time.time() - self.last_switch_time
-
-        if self.scheduler_state == 'GREEN':
-            if elapsed >= self._green_duration:
-                # Check if the new pending action is differnet from current action
-                if not self.pending_actions.empty():
-                    next_action = self.pending_actions.queue[0]
-
-                    # If the next action is the same as current, just remove it
-                    if next_action == self.current_action:
-                        self.pending_actions.get()
-                    else:
-                        self._set_yellow()
-
-        elif self.scheduler_state == 'YELLOW':
-            if self._is_intersection_clear() and elapsed >= self._yellow_duration:
-                self._set_red()
-
-                if not self.pending_actions.empty():
-                    next_action = self.pending_actions.get()
-                    self._apply_agent_action(next_action)
-
-        elif self.scheduler_state == 'WAITING_FOR_NEXT_ACTION':
-            if not self.pending_actions.empty():
-                next_action = self.pending_actions.get()
-                self._apply_agent_action(next_action)
-
-    def _set_yellow(self):
+    def _set_yellow(self, cur_time):
         for tl in self.traffic_lights:
             if tl.state == 'GREEN':
                 tl.state = 'YELLOW'
 
         self.scheduler_state = 'YELLOW'
-        self.last_switch_time = time.time()
+        self.last_switch_time = cur_time
 
     def _set_red(self):
         for tl in self.traffic_lights:
             tl.state = 'RED'
 
         self.scheduler_state = 'WAITING_FOR_NEXT_ACTION'
+
+    def _get_time(self):
+        return time.time()
+
+    def update(self):
+        cur_time = self._get_time()
+        elapsed = cur_time - self.last_switch_time
+
+        if self.scheduler_state == 'GREEN' and elapsed >= self._green_duration:
+            # Check if the new pending action is differnet from current action
+            if not self.pending_actions.empty():
+                # If the next action is the same as current, continue with
+                # green until another different action is queued
+                next_action = self.pending_actions.queue[0]
+
+                if next_action == self.current_action:
+                    self.pending_actions.get()
+                    self.last_switch_time = cur_time
+                else:
+                    self._set_yellow(cur_time)
+            else:
+                # No action? No need to switch. Just wait.
+                pass  # Stay in GREEN until agent decides to do something
+
+        elif self.scheduler_state == 'YELLOW' and elapsed >= self._yellow_duration:
+            if self._is_intersection_clear():
+                self._set_red()
+
+                if not self.pending_actions.empty():
+                    next_action = self.pending_actions.get()
+                    self._apply_agent_action(next_action, cur_time)
+
+        elif self.scheduler_state == 'WAITING_FOR_NEXT_ACTION':
+            next_action = self.pending_actions.get()
+            self._apply_agent_action(next_action, cur_time)
