@@ -18,7 +18,7 @@ class TrafficLightScheduler:
 
         # Internal State
         self.current_action = None
-        self.pending_actions = Queue()
+        self.pending_action = None
         self.scheduler_state = 'WAITING_FOR_NEXT_ACTION'
         self.last_switch_time = time.time()
 
@@ -35,6 +35,7 @@ class TrafficLightScheduler:
         return True
 
     def _apply_agent_action(self, action: int, cur_time):
+        """Applies the agent's action by setting the appropriate traffic lights to GREEN."""
         green_dirs = ['N', 'S'] if action == 0 else ['E', 'W']
 
         for tl in self.traffic_lights:
@@ -65,30 +66,23 @@ class TrafficLightScheduler:
         cur_time = self._get_time()
         elapsed = cur_time - self.last_switch_time
 
-        if self.scheduler_state == 'GREEN' and elapsed >= self._green_duration:
-            # Check if the new pending action is differnet from current action
-            if not self.pending_actions.empty():
-                # If the next action is the same as current, continue with
-                # green until another different action is queued
-                next_action = self.pending_actions.queue[0]
-
-                if next_action == self.current_action:
-                    self.pending_actions.get()
-                    self.last_switch_time = cur_time
-                else:
+        if self.scheduler_state == 'GREEN':
+            if elapsed >= self._green_duration:
+                if self.pending_action is not None and self.pending_action != self.current_action:
                     self._set_yellow(cur_time)
-            else:
-                # No action? No need to switch. Just wait.
-                pass  # Stay in GREEN until agent decides to do something
 
-        elif self.scheduler_state == 'YELLOW' and elapsed >= self._yellow_duration:
-            if self._is_intersection_clear():
+                elif self.pending_action == self.current_action:
+                    self.pending_action = None
+
+        elif self.scheduler_state == 'YELLOW':
+            if self._is_intersection_clear() and elapsed >= self._yellow_duration:
                 self._set_red()
 
-                if not self.pending_actions.empty():
-                    next_action = self.pending_actions.get()
-                    self._apply_agent_action(next_action, cur_time)
+                if self.pending_action is not None:
+                    self._apply_agent_action(self.pending_action, cur_time)
+                    self.pending_action = None
 
         elif self.scheduler_state == 'WAITING_FOR_NEXT_ACTION':
-            next_action = self.pending_actions.get()
-            self._apply_agent_action(next_action, cur_time)
+            if self.pending_action is not None:
+                self._apply_agent_action(self.pending_action, cur_time)
+                self.pending_action = None

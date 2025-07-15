@@ -102,7 +102,7 @@ class TrafficEnv:
             self.repeat_count = 1
             self.last_action = action
 
-        self.scheduler.pending_actions.put(action)
+        self.scheduler.pending_action = action
 
     def _reset_simulation(self):
         # Internal State
