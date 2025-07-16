@@ -23,6 +23,7 @@ class TrafficLightScheduler:
         self.last_switch_time = time.time()
 
     def _is_intersection_clear(self):
+        """Check if the intersection is clear of cars."""
         center = CENTER
         lane_width = LANE_WIDTH // 2
         margin = 10
@@ -46,6 +47,7 @@ class TrafficLightScheduler:
         self.last_switch_time = cur_time
 
     def _set_yellow(self, cur_time):
+        """Transition to YELLOW state and reset timer."""
         for tl in self.traffic_lights:
             if tl.state == 'GREEN':
                 tl.state = 'YELLOW'
@@ -54,6 +56,7 @@ class TrafficLightScheduler:
         self.last_switch_time = cur_time
 
     def _set_red(self):
+        """Transition YELLOW lights to RED state."""
         for tl in self.traffic_lights:
             tl.state = 'RED'
 
@@ -63,16 +66,14 @@ class TrafficLightScheduler:
         return time.time()
 
     def update(self):
+        """Update the traffic light scheduler state machine."""
         cur_time = self._get_time()
         elapsed = cur_time - self.last_switch_time
 
-        if self.scheduler_state == 'GREEN':
-            if elapsed >= self._green_duration:
-                if self.pending_action is not None and self.pending_action != self.current_action:
+        if self.scheduler_state == 'GREEN' and elapsed >= self._green_duration:
+            if self.pending_action is not None:
+                if self.pending_action != self.current_action:
                     self._set_yellow(cur_time)
-
-                elif self.pending_action == self.current_action:
-                    self.pending_action = None
 
         elif self.scheduler_state == 'YELLOW':
             if self._is_intersection_clear() and elapsed >= self._yellow_duration:

@@ -17,8 +17,8 @@ class CarsController:
         self._initialize_lane_queue()
 
     def _initialize_lane_queue(self):
-        for dirctn in ["N", "S", "W", "E"]:
-            self.lane_queues[dirctn] = LaneQueue()
+        for dir in ["N", "S", "W", "E"]:
+            self.lane_queues[dir] = LaneQueue()
 
     def update_cars_positions(self, screen, render_game: bool = False) -> int:
         self._remove_out_of_bounds()
@@ -73,7 +73,6 @@ class CarsController:
                 # Since I'm running this method on every frame, it's safe to
                 # think that the first car in any lane left the window frame
                 lane_queue = self.lane_queues[car.direction]
-                if lane_queue.peek(car.lane) == car:
-                    lane_queue.dequeue(car.lane)
+                lane_queue.dequeue(car.lane)
 
                 self.cars.remove(car)
