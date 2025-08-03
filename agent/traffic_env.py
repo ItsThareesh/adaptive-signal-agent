@@ -53,7 +53,9 @@ class TrafficEnv:
             self.renderer.draw_edge_green_boxes()
             self.renderer.draw_lanes()
             self.renderer.draw_stop_lines()
-            self.renderer.draw_traffic_lights(self.traffic_lights)
+            self.renderer.draw_traffic_lights(
+                self.traffic_lights, self.scheduler.get_yellow_time_left()
+            )
             self.renderer.show_cars(len(self.spawner.cars))
             self.renderer.show_fps(self.clock)
 

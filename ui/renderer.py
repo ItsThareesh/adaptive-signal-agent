@@ -131,7 +131,7 @@ class RenderUI:
             2,
         )
 
-    def draw_traffic_lights(self, traffic_lights: list[TrafficLight]):
+    def draw_traffic_lights(self, traffic_lights: list[TrafficLight], yellow_time_left: dict = None):
         radius = 10
         x, y = 0, 0
 
@@ -164,6 +164,13 @@ class RenderUI:
                 y = center
 
             pygame.draw.circle(self.screen, color, (x, y), radius)
+
+            # Draw time left if green
+            if tl.state == "YELLOW" and yellow_time_left and yellow_time_left.get(tl.direction) is not None:
+                font = pygame.font.SysFont("Arial", 14, True)
+                time_text = font.render(f"{yellow_time_left[tl.direction]:.0f}", True, (0, 0, 0))
+                text_rect = time_text.get_rect(center=(x, y))
+                self.screen.blit(time_text, text_rect)
 
     def show_fps(self, clock):
         font = pygame.font.SysFont("Arial", 16, True)

@@ -1,4 +1,3 @@
-from queue import Queue
 import time
 from typing import List
 from ui.ui_constants import CENTER, LANE_WIDTH
@@ -74,6 +73,10 @@ class TrafficLightScheduler:
             if self.pending_action is not None:
                 if self.pending_action != self.current_action:
                     self._set_yellow(cur_time)
+                # If the pending action is the same as current, just reset the timer
+                else:
+                    self.last_switch_time = cur_time
+                    self.pending_action = None
 
         elif self.scheduler_state == 'YELLOW':
             if self._is_intersection_clear() and elapsed >= self._yellow_duration:
@@ -87,3 +90,21 @@ class TrafficLightScheduler:
             if self.pending_action is not None:
                 self._apply_agent_action(self.pending_action, cur_time)
                 self.pending_action = None
+
+    def get_yellow_time_left(self):
+        """Returns a dict of time left for current state for each direction."""
+        time_left = {}
+        elapsed = self._get_time() - self.last_switch_time
+
+        if self.scheduler_state == 'YELLOW':
+            remaining = max(0, self._yellow_duration - elapsed)
+            yellow_dirs = ['N', 'S'] if self.current_action == 0 else ['E', 'W']
+
+            for d in ['N', 'S', 'E', 'W']:
+                time_left[d] = remaining if d in yellow_dirs else None
+
+        else:
+            for d in ['N', 'S', 'E', 'W']:
+                time_left[d] = None
+
+        return time_left
